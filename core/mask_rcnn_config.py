@@ -114,7 +114,7 @@ class InMemoryDataset(OsmMappingDataset):
         return self.get_mask_from_array(m)
 
     @staticmethod
-    def get_mask_from_array(self, arr) -> Tuple[np.ndarray, np.ndarray]:
+    def get_mask_from_array(arr) -> Tuple[np.ndarray, np.ndarray]:
         instances = get_instances_from_array(arr)
         class_ids = np.zeros(len(instances), np.int32)
 
