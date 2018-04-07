@@ -20,18 +20,18 @@ class MyMaskRcnnConfig(Config):
 
     # Batch size is (GPUs * images/GPU).
     GPU_COUNT = 1
-    IMAGES_PER_GPU = 4
+    IMAGES_PER_GPU = 1
     LEARNING_RATE = 0.001
 
     # faster training
-    # STEPS_PER_EPOCH = 100 // IMAGES_PER_GPU
+    STEPS_PER_EPOCH = 280741 // IMAGES_PER_GPU
 
     # all images
     # STEPS_PER_EPOCH = 1000
 
     # Each tile is 256 pixels across, training data is 3x3 tiles
     IMAGE_MIN_DIM = IMAGE_WIDTH
-    IMAGE_MAX_DIM = 1024
+    IMAGE_MAX_DIM = IMAGE_WIDTH
 
     USE_MINI_MASK = True
     # MINI_MASK_SHAPE = (128, 128)
@@ -42,7 +42,7 @@ class MyMaskRcnnConfig(Config):
     # TRAIN_ROIS_PER_IMAGE = 64
     # DETECTION_MAX_INSTANCES = 64
 
-    # VALIDATION_STEPS = 100
+    VALIDATION_STEPS = 100  # 60317
 
 
 class OsmMappingDataset(utils.Dataset):

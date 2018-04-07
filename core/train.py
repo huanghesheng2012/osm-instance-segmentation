@@ -10,6 +10,8 @@ COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn", "mask_rcnn_coco.h5")
 MODEL_DIR = os.path.join(ROOT_DIR, "model")
 DATA_DIR = os.path.join(ROOT_DIR, "images")
 TRAINING_DATA_DIR = "/training-data"
+VALIDATION_DATA_DIR = "/validation-data"
+TEST_DATA_DIR = "/test-data"
 DATASET_SIZE = None  # 30000  # None = Max
 
 if not os.path.isdir(TRAINING_DATA_DIR):
@@ -20,35 +22,17 @@ if not os.path.isdir(TRAINING_DATA_DIR):
                            .format(TRAINING_DATA_DIR))
 
 
-def get_random_images(search_dir, limit=None):
-    print("Using training images in: ", search_dir)
-    images = glob.glob(os.path.join(search_dir, "**/*.tiff"), recursive=True)
-    print("{} images found...".format(len(images)))
-    random.shuffle(images)
-    if limit and len(images) > limit:
-        print("Taking randomly {} images from dataset...".format(limit))
-        images = images[:limit]
-
-    cutoff_index = int(len(images) * .8)
-    training_images = images[0:cutoff_index]
-    validation_images = images[cutoff_index:]
-    return training_images, validation_images
-
-
-def get_random_datasets(size=None, search_dir=TRAINING_DATA_DIR, no_logging=False):
-    if not size:
-        size = DATASET_SIZE
-    training_images, validation_images = get_random_images(limit=size, search_dir=search_dir)
+def get_datasets(no_logging=False):
+    training_images = glob.glob(os.path.join(TRAINING_DATA_DIR, "**/*.jpg"), recursive=True)
+    validation_images = glob.glob(os.path.join(VALIDATION_DATA_DIR, "**/*.jpg"), recursive=True)
 
     # Training dataset
     dataset_train = InMemoryDataset(no_logging)
-    # dataset_train = OsmMappingDataset()
     dataset_train.load(training_images)
     dataset_train.prepare()
 
     # Validation dataset
     dataset_val = InMemoryDataset(no_logging)
-    # dataset_val = OsmMappingDataset()
     dataset_val.load(validation_images)
     dataset_val.prepare()
     return dataset_train, dataset_val
@@ -57,6 +41,8 @@ def get_random_datasets(size=None, search_dir=TRAINING_DATA_DIR, no_logging=Fals
 def train():
     config = MyMaskRcnnConfig()
     config.display()
+
+    dataset_train, dataset_val = get_datasets()
 
     # Create model in training mode
     model = modellib.MaskRCNN(mode="training", config=config, model_dir=MODEL_DIR)
@@ -83,7 +69,6 @@ def train():
     if init_with != "last":
         # Training - Stage 1
         # Adjust epochs and layers as needed
-        dataset_train, dataset_val = get_random_datasets()
         print("Training network heads")
         model.train(train_dataset=dataset_train,
                     val_dataset=dataset_val,
@@ -94,7 +79,6 @@ def train():
 
         # Training - Stage 2
         # Finetune layers from ResNet stage 4 and up
-        dataset_train, dataset_val = get_random_datasets()
         print("Training Resnet layer 3+")
         model.train(train_dataset=dataset_train,
                     val_dataset=dataset_val,
@@ -105,7 +89,6 @@ def train():
 
     # Finetune layers from ResNet stage 3 and up
     print("Training all")
-    dataset_train, dataset_val = get_random_datasets()
     model.train(train_dataset=dataset_train,
                 val_dataset=dataset_val,
                 learning_rate=config.LEARNING_RATE / 100,
