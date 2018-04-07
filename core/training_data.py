@@ -137,10 +137,14 @@ def get_instances(mask_path: str) -> List[np.ndarray]:
     img = Image.open(mask_path)
     imgray = img.convert('L')
     data = np.asarray(imgray)
+    return get_instances_from_array(data)
+
+
+def get_instances_from_array(data) -> List[np.ndarray]:
     labeled, num_features = ndimage.label(data)
     instances = []
     for i in range(1, num_features+1):
-        x = np.zeros_like(imgray)
+        x = np.zeros_like(data)
         x[labeled == i] = 1
         instances.append(x)
     return instances

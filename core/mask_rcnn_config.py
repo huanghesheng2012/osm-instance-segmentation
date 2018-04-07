@@ -1,7 +1,7 @@
 from mask_rcnn.config import Config
 import sys
 from mask_rcnn import utils
-from core.training_data import get_instances
+from core.training_data import get_instances, get_instances_from_array
 from core.settings import IMAGE_WIDTH
 from typing import Tuple
 import os
@@ -111,7 +111,18 @@ class InMemoryDataset(OsmMappingDataset):
         # m.shape has a shape of (300, 300, 1)
         # so we first convert it to a shape of (300, 300)
         m = m.reshape((img['height'], img['width']))
-        return m
+        return self.get_mask_from_array(m)
+
+    @staticmethod
+    def get_mask_from_array(self, arr) -> Tuple[np.ndarray, np.ndarray]:
+        instances = get_instances_from_array(arr)
+        class_ids = np.zeros(len(instances), np.int32)
+
+        mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(instances)], dtype=np.uint8)
+        for i, inst in enumerate(instances):
+            class_ids[i] = osm_class_ids["building"]
+            mask[:, :, i] = inst
+        return mask, class_ids
 
     def load(self):
         image_ids = self.coco.getImgIds(catIds=self.coco.getCatIds())
