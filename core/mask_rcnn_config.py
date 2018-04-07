@@ -32,8 +32,8 @@ class MyMaskRcnnConfig(Config):
     # STEPS_PER_EPOCH = 1000
 
     # Each tile is 256 pixels across, training data is 3x3 tiles
-    IMAGE_MIN_DIM = IMAGE_WIDTH
-    IMAGE_MAX_DIM = IMAGE_WIDTH
+    IMAGE_MIN_DIM = 320
+    IMAGE_MAX_DIM = 320
 
     USE_MINI_MASK = True
     # MINI_MASK_SHAPE = (128, 128)
@@ -140,6 +140,7 @@ class InMemoryDataset(OsmMappingDataset):
                 progress = new_progress
                 print("Caching progress: {}% ({} images)".format(progress, idx+1))
                 sys.stdout.flush()
+            break
         print("Loaded.")
 
     def load_image(self, image_id):
