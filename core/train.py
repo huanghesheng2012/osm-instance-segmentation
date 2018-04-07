@@ -27,13 +27,13 @@ def get_datasets(no_logging=False):
     validation_images = glob.glob(os.path.join(VALIDATION_DATA_DIR, "**/*.jpg"), recursive=True)
 
     # Training dataset
-    dataset_train = InMemoryDataset(no_logging)
-    dataset_train.load(training_images)
+    dataset_train = InMemoryDataset(TRAINING_DATA_DIR)
+    dataset_train.load()
     dataset_train.prepare()
 
     # Validation dataset
-    dataset_val = InMemoryDataset(no_logging)
-    dataset_val.load(validation_images)
+    dataset_val = InMemoryDataset(VALIDATION_DATA_DIR)
+    dataset_val.load()
     dataset_val.prepare()
     return dataset_train, dataset_val
 

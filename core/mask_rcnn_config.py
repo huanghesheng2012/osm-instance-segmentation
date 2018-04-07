@@ -7,6 +7,8 @@ from typing import Tuple
 import os
 import numpy as np
 from PIL import Image
+from pycocotools.coco import COCO
+from pycocotools import mask as cocomask
 
 osm_class_ids = {
     'building': 1
@@ -93,29 +95,45 @@ class OsmMappingDataset(utils.Dataset):
 
 
 class InMemoryDataset(OsmMappingDataset):
-    def __init__(self, no_logging=False):
+    def __init__(self, path):
         OsmMappingDataset.__init__(self)
         self._cache = {}
         print("Dataset: InMemoryDataset")
-        self.no_logging = no_logging
+        self.no_logging = False
+        self.path = path
+        self.coco = COCO(os.path.join(path, "annotation.json"))
 
-    def load(self, images):
+    def get_mask_from_annotation(self, img):
+        annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
+        annotations = self.coco.loadAnns(annotation_ids)
+        rle = cocomask.frPyObjects(annotations[0]['segmentation'], img['height'], img['width'])
+        m = cocomask.decode(rle)
+        # m.shape has a shape of (300, 300, 1)
+        # so we first convert it to a shape of (300, 300)
+        m = m.reshape((img['height'], img['width']))
+        return m
+
+    def load(self, _):
+        image_ids = self.coco.getImgIds(catIds=self.coco.getCatIds())
+        images = self.coco.loadImgs(image_ids)
+
         self.add_class("osm", 0, "building")
         print("")
         print("Loading {} images...".format(len(images)))
         progress = 0
         total_nr_images = len(images)
-        for idx, image_path in enumerate(images):
+        for idx, coco_img in enumerate(images):
             try:
+                image_path = os.path.join(self.path, "images", coco_img["file_name"])
                 img = self._get_image(path=image_path)
-                msk = self._get_mask(image_path[:-1])
+                msk = self.get_mask_from_annotation(coco_img)
                 self.add_image(source="osm", image_id=image_path, path=image_path)
                 self._cache[image_path] = {
                     "img": img,
                     "mask": msk
                 }
             except:
-                print("Image loading failed: {}".format(image_path))
+                raise RuntimeError("Image loading failed: ", coco_img)
 
             new_progress = int(round(idx / total_nr_images * 100))
             if not self.no_logging and new_progress != progress:
