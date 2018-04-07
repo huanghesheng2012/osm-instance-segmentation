@@ -113,7 +113,7 @@ class InMemoryDataset(OsmMappingDataset):
         m = m.reshape((img['height'], img['width']))
         return m
 
-    def load(self, _):
+    def load(self):
         image_ids = self.coco.getImgIds(catIds=self.coco.getCatIds())
         images = self.coco.loadImgs(image_ids)
 
