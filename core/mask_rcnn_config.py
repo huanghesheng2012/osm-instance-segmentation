@@ -148,7 +148,6 @@ class InMemoryDataset(OsmMappingDataset):
                 progress = new_progress
                 print("Caching progress: {}% ({} images)".format(progress, idx+1))
                 sys.stdout.flush()
-            break
         print("Loaded.")
 
     def load_image(self, image_id):
