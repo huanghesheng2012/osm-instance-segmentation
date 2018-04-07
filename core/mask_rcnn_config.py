@@ -134,17 +134,14 @@ class InMemoryDataset(OsmMappingDataset):
         progress = 0
         total_nr_images = len(images)
         for idx, coco_img in enumerate(images):
-            try:
-                image_path = os.path.join(self.path, "images", coco_img["file_name"])
-                img = self._get_image(path=image_path)
-                msk = self.get_mask_from_annotation(coco_img)
-                self.add_image(source="osm", image_id=image_path, path=image_path)
-                self._cache[image_path] = {
-                    "img": img,
-                    "mask": msk
-                }
-            except:
-                raise RuntimeError("Image loading failed: ", coco_img)
+            image_path = os.path.join(self.path, "images", coco_img["file_name"])
+            img = self._get_image(path=image_path)
+            msk = self.get_mask_from_annotation(coco_img)
+            self.add_image(source="osm", image_id=image_path, path=image_path)
+            self._cache[image_path] = {
+                "img": img,
+                "mask": msk
+            }
 
             new_progress = int(round(idx / total_nr_images * 100))
             if not self.no_logging and new_progress != progress:
