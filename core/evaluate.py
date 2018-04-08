@@ -24,5 +24,5 @@ def evaluate():
 
 
 if __name__ == "__main__":
-    test_images("eval_predictions.json", "eval_tested_images.txt", 10, VALIDATION_DATA_DIR)
+    test_images("eval_predictions.json", "eval_tested_images.txt", 2, VALIDATION_DATA_DIR)
     evaluate()
