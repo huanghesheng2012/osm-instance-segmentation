@@ -1,7 +1,7 @@
 import os
 from core.mask_rcnn_config import VALIDATION_DATA_DIR
 from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval
+from core.cocoeval import COCOeval
 import json
 from core.predict import test_images
 
