@@ -90,8 +90,8 @@ def test_all():
     for idx, img_path in enumerate(images):
         point_sets_with_score = predictor.predict_path(img_path)
         for contour, score in point_sets_with_score:
-            xs = map(lambda pt: pt[0], contour)
-            ys = map(lambda pt: pt[1], contour)
+            xs = list(map(lambda pt: pt[0], contour))
+            ys = list(map(lambda pt: pt[1], contour))
             if contour:
                 bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
             else:
@@ -104,7 +104,7 @@ def test_all():
                 "score": score
             }
             annotations.append(ann)
-        new_progress = np.round(100*idx / nr_images, 1)
+        new_progress = 100*idx / nr_images
         if new_progress > progress:
             progress = new_progress
             print("Progress: {}%".format(progress))
