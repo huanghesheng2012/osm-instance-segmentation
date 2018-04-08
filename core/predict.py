@@ -87,7 +87,9 @@ def test_all():
     annotations = []
     if os.path.isfile("predictions.json"):
         with open("predictions.json", 'r', encoding="utf-8") as f:
-            annotations = json.load(f)
+            data = f.read()
+            if data:
+                annotations = json.loads(data)
     progress = 0
     nr_images = float(len(images))
     processed_images_path = os.path.join(os.getcwd(), "tested_images.txt")
@@ -129,7 +131,7 @@ def test_all():
                 "category_id": 100,
                 "segmentation": [contour],
                 "bbox": bbox,
-                "score": score
+                "score": str(score)
             }
             annotations.append(ann)
             with open("predictions.json", "w") as fp:
