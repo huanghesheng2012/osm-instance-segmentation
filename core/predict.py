@@ -83,10 +83,11 @@ class Predictor:
 
 def test_all():
     predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
+    annotations_path = os.path.join(os.getcwd(), "predictions.json")
     images = glob.glob(os.path.join(TEST_DATA_DIR, "**/*.jpg"), recursive=True)
     annotations = []
-    if os.path.isfile("predictions.json"):
-        with open("predictions.json", 'r', encoding="utf-8") as f:
+    if os.path.isfile(annotations_path):
+        with open(annotations_path, 'r', encoding="utf-8") as f:
             data = f.read()
             if data:
                 annotations = json.loads(data)
@@ -134,7 +135,7 @@ def test_all():
                 "score": str(score)
             }
             annotations.append(ann)
-            with open("predictions.json", "w") as fp:
+            with open(annotations_path, "w") as fp:
                 fp.write(json.dumps(annotations))
 
 
