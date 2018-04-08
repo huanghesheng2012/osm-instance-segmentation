@@ -458,14 +458,20 @@ def get_contours(masks: np.ndarray) -> List[List[Tuple[int, int]]]:
     contours: List[List[Tuple[int, int]]] = []
     for i in range(masks.shape[-1]):
         mask = masks[:, :, i]
-        if mask.any():
-            conts = find_contours(mask, 0.5)
-            for c in conts:
-                rr, cc = polygon_perimeter(c[:, 0], c[:, 1], shape=mask.shape, clip=False)
-                points = tuple(zip(cc, rr))
-                contours.append(points)
+        points = get_contour(mask)
+        if points:
+            contours.append(points)
     return contours
 
+
+def get_contour(mask: np.ndarray) -> List[Tuple[int, int]]:
+    points = []
+    if mask.any():
+        conts = find_contours(mask, 0.5)
+        for c in conts:
+            rr, cc = polygon_perimeter(c[:, 0], c[:, 1], shape=mask.shape, clip=False)
+            points = tuple(zip(cc, rr))
+    return points
 
 def get_corner_points(outline: List[Line]) -> List[Tuple[float, float]]:
     corner_points = []
