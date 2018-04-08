@@ -142,9 +142,10 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
                 "bbox": bbox,
                 "score": float(np.round(score, 2))
             }
-            annotations.append(ann)
-            with open(annotations_path, "w") as fp:
-                fp.write(json.dumps(annotations))
+            if bbox:
+                annotations.append(ann)
+                with open(annotations_path, "w") as fp:
+                    fp.write(json.dumps(annotations))
 
 
 if __name__ == "__main__":
