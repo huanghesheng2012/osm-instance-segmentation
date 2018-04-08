@@ -87,8 +87,31 @@ def test_all():
     annotations = []
     progress = 0
     nr_images = float(len(images))
+    processed_images_path = os.path.join(os.getcwd(), "tested_images.txt")
+    processed_images = []
+    if os.path.isfile(processed_images_path):
+        with open(processed_images_path, 'r', encoding="utf-8") as f:
+            lines = f.readlines()
+            processed_images = list(map(lambda l: l[:-1], lines))  # remove '\n'
+
     for idx, img_path in enumerate(images):
-        point_sets_with_score = predictor.predict_path(img_path, verbose=0)
+        new_progress = 100*idx / nr_images
+        if new_progress > progress:
+            progress = new_progress
+            print("Progress: {}%".format(progress))
+            sys.stdout.flush()
+        if img_path in processed_images:
+            continue
+
+        with open(processed_images_path, 'a') as f:
+            f.write("{}\n".format(img_path))
+
+        point_sets_with_score = [([], 0)]
+        try:
+            point_sets_with_score = predictor.predict_path(img_path, verbose=0)
+        except:
+            print("Prediction failed somehow")
+
         for contour, score in point_sets_with_score:
             xs = list(map(lambda pt: pt[0], contour))
             ys = list(map(lambda pt: pt[1], contour))
@@ -104,11 +127,7 @@ def test_all():
                 "score": score
             }
             annotations.append(ann)
-        new_progress = 100*idx / nr_images
-        if new_progress > progress:
-            progress = new_progress
-            print("Progress: {}%".format(progress))
-            sys.stdout.flush()
+
     with open("predictions.json", "w") as fp:
         fp.write(json.dumps(annotations))
 
