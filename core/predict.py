@@ -131,10 +131,14 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
                 bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
             else:
                 bbox = []
+            points_sequence = []
+            for p in contour:
+                points_sequence.append(p[0])
+                points_sequence.append(p[1])
             ann = {
                 "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
                 "category_id": 100,
-                "segmentation": [contour],
+                "segmentation": [p],
                 "bbox": bbox,
                 "score": str(score)
             }
