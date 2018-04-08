@@ -24,9 +24,9 @@ class Line:
         self._p1 = p1
         self._p2 = p2
         self._length = LineString([p1, p2]).length
-        self._orientation: float = None
-        self._orthogonal: bool = False
-        self._neighbourhood: uuid = None
+        self._orientation = None
+        self._orthogonal = False
+        self._neighbourhood = None
 
     def set_nr(self, nr: int):
         self._nr = nr
