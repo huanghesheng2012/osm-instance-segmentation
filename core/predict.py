@@ -27,7 +27,7 @@ class Predictor:
         self.weights_path = weights_path
         self._model = None
 
-    def predict_array(self, img_data: np.ndarray, extent=None, do_rectangularization=True, tile=None) \
+    def predict_array(self, img_data: np.ndarray, extent=None, do_rectangularization=True, tile=None, verbose=1) \
             -> List[List[Tuple[int, int]]]:
         if not tile:
             tile = (0, 0)
@@ -42,7 +42,7 @@ class Predictor:
 
         model = self._model
         print("Predicting...")
-        res = model.detect([img_data], verbose=1)
+        res = model.detect([img_data], verbose=verbose)
         print("Prediction done")
         print("Extracting contours...")
         point_sets = []
@@ -75,10 +75,10 @@ class Predictor:
                     rectangularized_outlines.append((georeffed, score))
         return rectangularized_outlines
 
-    def predict_path(self, img_path: str, extent=None) -> List[List[Tuple[int, int]]]:
+    def predict_path(self, img_path: str, extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
         img = Image.open(img_path)
         data = np.asarray(img, dtype="uint8")
-        return self.predict_array(img_data=data, extent=extent)
+        return self.predict_array(img_data=data, extent=extent, verbose=verbose)
 
 
 def test_all():
@@ -88,7 +88,7 @@ def test_all():
     progress = 0
     nr_images = float(len(images))
     for idx, img_path in enumerate(images):
-        point_sets_with_score = predictor.predict_path(img_path)
+        point_sets_with_score = predictor.predict_path(img_path, verbose=0)
         for contour, score in point_sets_with_score:
             xs = list(map(lambda pt: pt[0], contour))
             ys = list(map(lambda pt: pt[1], contour))
