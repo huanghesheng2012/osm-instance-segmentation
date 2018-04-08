@@ -1,6 +1,7 @@
 import os
 import sys
 import glob
+import random
 from mask_rcnn import model as modellib
 from core.mask_rcnn_config import MyMaskRcnnConfig, TEST_DATA_DIR
 from core.utils import georeference, rectangularize, get_contours, get_contour
@@ -81,10 +82,13 @@ class Predictor:
         return self.predict_array(img_data=data, extent=extent, verbose=verbose)
 
 
-def test_all():
+def test_images(annotations_file_name="predictions.json", processed_images_name="tested_images.txt", nr_images=None, target_dir=TEST_DATA_DIR):
     predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
-    annotations_path = os.path.join(os.getcwd(), "predictions.json")
-    images = glob.glob(os.path.join(TEST_DATA_DIR, "**/*.jpg"), recursive=True)
+    annotations_path = os.path.join(os.getcwd(), annotations_file_name)
+    images = glob.glob(os.path.join(target_dir, "**/*.jpg"), recursive=True)
+    if nr_images:
+        random.shuffle(images)
+        images = images[:nr_images]
     annotations = []
     if os.path.isfile(annotations_path):
         with open(annotations_path, 'r', encoding="utf-8") as f:
@@ -93,7 +97,7 @@ def test_all():
                 annotations = json.loads(data)
     progress = 0
     nr_images = float(len(images))
-    processed_images_path = os.path.join(os.getcwd(), "tested_images.txt")
+    processed_images_path = os.path.join(os.getcwd(), processed_images_name)
     processed_images = []
     if os.path.isfile(processed_images_path):
         with open(processed_images_path, 'r', encoding="utf-8") as f:
@@ -140,4 +144,4 @@ def test_all():
 
 
 if __name__ == "__main__":
-    test_all()
+    test_images()
