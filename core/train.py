@@ -1,6 +1,5 @@
 import os
-import random
-from core.mask_rcnn_config import MyMaskRcnnConfig, OsmMappingDataset, InMemoryDataset
+from core.mask_rcnn_config import MyMaskRcnnConfig, InMemoryDataset, VALIDATION_DATA_DIR, TRAINING_DATA_DIR
 from mask_rcnn import model as modellib, utils
 import glob
 from core.settings import IMAGE_OUTPUT_FOLDER
@@ -9,9 +8,7 @@ ROOT_DIR = os.getcwd()
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn", "mask_rcnn_coco.h5")
 MODEL_DIR = os.path.join(ROOT_DIR, "model")
 DATA_DIR = os.path.join(ROOT_DIR, "images")
-TRAINING_DATA_DIR = "/training-data"
-VALIDATION_DATA_DIR = "/validation-data"
-TEST_DATA_DIR = "/test-data"
+
 DATASET_SIZE = None  # 30000  # None = Max
 
 if not os.path.isdir(TRAINING_DATA_DIR):

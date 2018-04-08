@@ -1,13 +1,13 @@
 import os
+import glob
 from mask_rcnn import model as modellib
-from core.mask_rcnn_config import MyMaskRcnnConfig
-from core.utils import MarchingSquares, georeference, rectangularize, get_contours
+from core.mask_rcnn_config import MyMaskRcnnConfig, TEST_DATA_DIR
+from core.utils import georeference, rectangularize, get_contours
 from typing import Iterable, Tuple, List
 from PIL import Image
-from skimage.draw import polygon_perimeter
-from skimage.measure import find_contours
 from core.settings import IMAGE_WIDTH
 import numpy as np
+import json
 
 
 class Predictor:
@@ -17,8 +17,8 @@ class Predictor:
         # Run detection on one image at a time
         GPU_COUNT = 1
         IMAGES_PER_GPU = 1
-        IMAGE_MIN_DIM = IMAGE_WIDTH
-        IMAGE_MAX_DIM = IMAGE_WIDTH
+        IMAGE_MIN_DIM = 320
+        IMAGE_MAX_DIM = 320
 
     def __init__(self, weights_path: str):
         if not os.path.isfile(weights_path):
@@ -73,3 +73,28 @@ class Predictor:
         img = Image.open(img_path)
         data = np.asarray(img, dtype="uint8")
         return self.predict_array(img_data=data, extent=extent)
+
+
+def test_all():
+    predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
+    images = glob.glob(os.path.join(TEST_DATA_DIR, "**/*.jpg"), recursive=True)
+    annotations = []
+    for img_path in images:
+        point_sets = predictor.predict_path(img_path)
+        for contour in point_sets:
+            xs = map(lambda pt: pt[0], contour)
+            ys = map(lambda pt: pt[1], contour)
+            bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
+            ann = {
+                "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
+                "category_id": 100,
+                "segmentation": contour,
+                "bbox": bbox,
+            }
+            annotations.append(ann)
+    with open("predictions.json", "w") as fp:
+        fp.write(json.dumps(annotations))
+
+
+if __name__ == "__main__":
+    test_all()

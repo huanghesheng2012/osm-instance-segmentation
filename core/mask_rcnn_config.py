@@ -14,6 +14,10 @@ osm_class_ids = {
     'building': 1
 }
 
+TRAINING_DATA_DIR = "/training-data"
+VALIDATION_DATA_DIR = "/validation-data"
+TEST_DATA_DIR = "/test-data"
+
 
 class MyMaskRcnnConfig(Config):
     NAME = "osm"
