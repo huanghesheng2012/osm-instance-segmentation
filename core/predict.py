@@ -92,7 +92,10 @@ def test_all():
         for contour, score in point_sets_with_score:
             xs = map(lambda pt: pt[0], contour)
             ys = map(lambda pt: pt[1], contour)
-            bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
+            if contour:
+                bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
+            else:
+                bbox = []
             ann = {
                 "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
                 "category_id": 100,
