@@ -11,10 +11,10 @@ def evaluate():
     assert os.path.isfile(annotation_path)
     ground_truth_annotations = COCO(annotation_path)
     predictions_path = os.path.join(os.getcwd(), "eval_predictions.json")
-    with open(predictions_path, 'r', encoding="utf-8") as f:
-        data = f.read()
-        submission_file = json.loads(data)
-    results = ground_truth_annotations.loadRes(submission_file)
+    # with open(predictions_path, 'r', encoding="utf-8") as f:
+    #     data = f.read()
+    #     submission_file = json.loads(data)
+    results = ground_truth_annotations.loadRes(predictions_path)
     cocoEval = COCOeval(ground_truth_annotations, results, 'segm')
     cocoEval.evaluate()
     cocoEval.accumulate()
