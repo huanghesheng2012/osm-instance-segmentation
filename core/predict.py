@@ -140,7 +140,7 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
                 "category_id": 100,
                 "segmentation": [points_sequence],
                 "bbox": bbox,
-                "score": str(score)
+                "score": np.round(score, 2)
             }
             annotations.append(ann)
             with open(annotations_path, "w") as fp:
