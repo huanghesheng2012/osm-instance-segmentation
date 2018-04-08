@@ -88,8 +88,9 @@ def test_all():
             ann = {
                 "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
                 "category_id": 100,
-                "segmentation": contour,
+                "segmentation": [contour],
                 "bbox": bbox,
+                "score": None
             }
             annotations.append(ann)
     with open("predictions.json", "w") as fp:
