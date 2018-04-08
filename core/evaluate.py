@@ -12,9 +12,10 @@ def evaluate():
     temp_annotation_path = os.path.join(os.getcwd(), "temp_annotations.json")
     with open(predictions_path, 'r', encoding="utf-8") as f:
         predicitions = json.load(f)
-    ids = list(map(lambda p: p["id"], predicitions))
+    ids = list(map(lambda p: p["image_id"], predicitions))
     ground_truth_annotations = COCO(annotation_path)
     matching_annotations = ground_truth_annotations.loadAnns(ids)
+    print("Matching annos: ", matching_annotations)
     with open(temp_annotation_path, 'w') as f:
         f.write(json.dumps(matching_annotations))
     ground_truth_annotations = COCO(temp_annotation_path)
