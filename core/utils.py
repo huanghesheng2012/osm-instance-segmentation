@@ -456,12 +456,16 @@ def get_contours(masks: np.ndarray) -> List[List[Tuple[int, int]]]:
 
 def get_contour(mask: np.ndarray) -> List[Tuple[int, int]]:
     points = []
-    if mask.any():
-        conts = find_contours(mask, 0.5)
-        for c in conts:
-            rr, cc = polygon_perimeter(c[:, 0], c[:, 1], shape=mask.shape, clip=False)
-            points = tuple(zip(cc, rr))
+    try:
+        if mask.any():
+            conts = find_contours(mask, 0.5)
+            for c in conts:
+                rr, cc = polygon_perimeter(c[:, 0], c[:, 1], shape=mask.shape, clip=False)
+                points = tuple(zip(cc, rr))
+    except:
+        print("Error during contour extraction. Empty contour will be returned")
     return points
+
 
 def get_corner_points(outline: List[Line]) -> List[Tuple[float, float]]:
     corner_points = []
