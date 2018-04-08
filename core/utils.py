@@ -279,7 +279,7 @@ def update_neighbourhoods(lines: List[Line], window_size: int = 5, reassignment_
         for ori in orientation_lengths:
             orientation_lengths[ori] = orientation_lengths[ori] / total_length
         most_probable_orientation = max(orientation_lengths, key=lambda l: orientation_lengths[l])
-        lines_of_most_probable_orientation: List[Line] = list(
+        lines_of_most_probable_orientation = list(
             filter(lambda l: l.orientation == most_probable_orientation, lines))
         most_probable_neighbourhood = lines_of_most_probable_orientation[0].neighbourhood
         master_line = list(sorted(lines_of_most_probable_orientation, key=lambda li: li.length * -1))[0]
