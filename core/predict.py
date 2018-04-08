@@ -138,9 +138,9 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             ann = {
                 "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
                 "category_id": 100,
-                "segmentation": [p],
+                "segmentation": [points_sequence],
                 "bbox": bbox,
-                "score": str(score)
+                "score": score
             }
             annotations.append(ann)
             with open(annotations_path, "w") as fp:
