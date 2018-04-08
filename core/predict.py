@@ -85,6 +85,9 @@ def test_all():
     predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
     images = glob.glob(os.path.join(TEST_DATA_DIR, "**/*.jpg"), recursive=True)
     annotations = []
+    if os.path.isfile("predictions.json"):
+        with open("predictions.json", 'r', encoding="utf-8") as f:
+            annotations = json.load(f)
     progress = 0
     nr_images = float(len(images))
     processed_images_path = os.path.join(os.getcwd(), "tested_images.txt")
@@ -109,8 +112,10 @@ def test_all():
         point_sets_with_score = [([], 0)]
         try:
             point_sets_with_score = predictor.predict_path(img_path, verbose=0)
-        except:
-            print("Prediction failed somehow")
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            print("An error occured: " + str(e))
 
         for contour, score in point_sets_with_score:
             xs = list(map(lambda pt: pt[0], contour))
@@ -127,9 +132,8 @@ def test_all():
                 "score": score
             }
             annotations.append(ann)
-
-    with open("predictions.json", "w") as fp:
-        fp.write(json.dumps(annotations))
+            with open("predictions.json", "w") as fp:
+                fp.write(json.dumps(annotations))
 
 
 if __name__ == "__main__":
