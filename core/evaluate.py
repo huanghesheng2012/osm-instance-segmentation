@@ -22,9 +22,9 @@ def evaluate():
     #     submission_file = json.loads(data)
     results = ground_truth_annotations.loadRes(predictions_path)
     cocoEval = COCOeval(ground_truth_annotations, results, 'segm')
-    for image_id in ids:
-        iou = cocoEval.computeIoU(image_id, 100)
-        print("IoU: {}".format(iou))
+    # for image_id in ids:
+    #     iou = cocoEval.computeIoU(image_id, 100)
+    #     print("IoU: {}".format(iou))
 
     cocoEval.evaluate()
     cocoEval.accumulate()

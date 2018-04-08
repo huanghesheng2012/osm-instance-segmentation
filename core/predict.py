@@ -125,16 +125,16 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             print("An error occured: " + str(e))
 
         for contour, score in point_sets_with_score:
-            xs = list(map(lambda pt: int(pt[0]), contour))
-            ys = list(map(lambda pt: int(pt[1]), contour))
+            xs = list(map(lambda pt: int(pt[0])-10, contour))  # -10 padding
+            ys = list(map(lambda pt: int(pt[1])-10, contour))
             if contour:
                 bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
             else:
                 bbox = []
             points_sequence = []
-            for p in contour:
-                points_sequence.append(int(round(p[0])))
-                points_sequence.append(int(round(p[1])))
+            for idx, x in enumerate(xs):
+                points_sequence.append(x)
+                points_sequence.append(ys[idx])
             ann = {
                 "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
                 "category_id": 100,
