@@ -125,8 +125,8 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             print("An error occured: " + str(e))
 
         for contour, score in point_sets_with_score:
-            xs = list(map(lambda pt: pt[0], contour))
-            ys = list(map(lambda pt: pt[1], contour))
+            xs = list(map(lambda pt: int(pt[0]), contour))
+            ys = list(map(lambda pt: int(pt[1]), contour))
             if contour:
                 bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
             else:
