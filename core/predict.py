@@ -133,8 +133,8 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
                 bbox = []
             points_sequence = []
             for p in contour:
-                points_sequence.append(p[0])
-                points_sequence.append(p[1])
+                points_sequence.append(int(round(p[0])))
+                points_sequence.append(int(round(p[1])))
             ann = {
                 "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
                 "category_id": 100,
