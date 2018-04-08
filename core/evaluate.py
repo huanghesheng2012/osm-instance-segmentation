@@ -13,12 +13,8 @@ def evaluate():
     with open(predictions_path, 'r', encoding="utf-8") as f:
         predicitions = json.load(f)
     ids = list(map(lambda p: p["image_id"], predicitions))
+
     ground_truth_annotations = COCO(annotation_path)
-    matching_annotations = ground_truth_annotations.loadAnns(ids)
-    print("Matching annos: ", matching_annotations)
-    with open(temp_annotation_path, 'w') as f:
-        f.write(json.dumps(matching_annotations))
-    ground_truth_annotations = COCO(temp_annotation_path)
 
     assert os.path.isfile(annotation_path)
     # with open(predictions_path, 'r', encoding="utf-8") as f:
@@ -26,6 +22,10 @@ def evaluate():
     #     submission_file = json.loads(data)
     results = ground_truth_annotations.loadRes(predictions_path)
     cocoEval = COCOeval(ground_truth_annotations, results, 'segm')
+    for image_id in ids:
+        iou = cocoEval.computeIoU(image_id, 100)
+        print("IoU: {}".format(iou))
+
     cocoEval.evaluate()
     cocoEval.accumulate()
     average_precision = cocoEval._summarize(ap=1, iouThr=0.5, areaRng="all", maxDets=100)
