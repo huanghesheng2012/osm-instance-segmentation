@@ -7,9 +7,13 @@ from core.predict import test_images
 
 
 def evaluate():
-    ground_truth_annotations = COCO(os.path.join(VALIDATION_DATA_DIR, "annotation.json"))
+    annotation_path = os.path.join(VALIDATION_DATA_DIR, "annotation.json")
+    assert os.path.isfile(annotation_path)
+    ground_truth_annotations = COCO(annotation_path)
     predictions_path = os.path.join(os.getcwd(), "eval_predictions.json")
-    submission_file = json.loads(open(predictions_path).read())
+    with open(predictions_path, 'r', encoding="utf-8") as f:
+        data = f.read()
+        submission_file = json.loads(data)
     results = ground_truth_annotations.loadRes(submission_file)
     cocoEval = COCOeval(ground_truth_annotations, results, 'segm')
     cocoEval.evaluate()
