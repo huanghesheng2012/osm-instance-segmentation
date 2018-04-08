@@ -98,9 +98,8 @@ def get_main_orientation(contour, angle_in_degrees: bool = False, max_lines: int
 
     angles = {}
     maxcount = 0
-    nearest_point = None
     weighted_avg = None
-    line: Line = None
+    line = None
     if lines is not None:
         for l in lines:  # rho = distance, theta = angle
             for rho, theta in l:
@@ -124,15 +123,6 @@ def get_main_orientation(contour, angle_in_degrees: bool = False, max_lines: int
                 x2 = int(x0 - 1000 * -b)
                 y2 = int(y0 - 1000 * a)
                 line = Line(nr=0, p1=(x1, y1), p2=(x2, y2))
-                # if not nearest_point:
-                #     dist = None
-                #     ls = LineString([(x1, y1), (x2, y2)])
-                #     for px, py in self._points:
-                #         p = geometry.Point(px, py)
-                #         new_dist = p.distance(ls)
-                #         if not nearest_point or new_dist < dist:
-                #             nearest_point = p
-                #             dist = new_dist
 
         angle_sum = 0
         counts = 0
@@ -212,10 +202,10 @@ def make_lines(points: List[Tuple[float, float]], point_distance_threshold: floa
     """
 
     points = points.copy()
-    lines: List[Line] = []
+    lines = []
     while points:
-        seg: List[Tuple[float, float]] = []
-        point_ids: List[int] = []
+        seg = []
+        point_ids = []
         while points and len(seg) < 3:
             seg.append(points.pop())
             point_ids.append(len(points))
@@ -273,9 +263,9 @@ def update_neighbourhoods(lines: List[Line], window_size: int = 5, reassignment_
     """
 
     window_size = min(window_size, len(lines))
-    sorted_by_nr: List[Line] = sorted(lines, key=lambda l: l.nr)
+    sorted_by_nr = sorted(lines, key=lambda l: l.nr)
     for idx, _ in enumerate(sorted_by_nr):
-        group: List[Line] = []
+        group = []
         while len(group) < window_size:
             group.append(sorted_by_nr[idx])
             idx = (idx + 1) % len(sorted_by_nr)
@@ -292,7 +282,7 @@ def update_neighbourhoods(lines: List[Line], window_size: int = 5, reassignment_
         lines_of_most_probable_orientation: List[Line] = list(
             filter(lambda l: l.orientation == most_probable_orientation, lines))
         most_probable_neighbourhood = lines_of_most_probable_orientation[0].neighbourhood
-        master_line: Line = list(sorted(lines_of_most_probable_orientation, key=lambda li: li.length * -1))[0]
+        master_line = list(sorted(lines_of_most_probable_orientation, key=lambda li: li.length * -1))[0]
         for ori in orientation_lengths:
             if orientation_lengths[ori] <= reassignment_threshold:
                 lines_to_reassign = filter(lambda l: l.orientation == ori, group)
@@ -311,7 +301,7 @@ def assign_neighbourhood(lines: List[Line], neighbour_distance_threshold: float 
     :return:
     """
 
-    all_neighbourhoods: List[List[Line]] = []
+    all_neighbourhoods = []
     grouped_by_orientation = groupby(lines, key=lambda l: "{};{}".format(l.orientation, l.orthogonal))
     for angle, g in grouped_by_orientation:
         group = list(g)
@@ -373,7 +363,7 @@ def get_angle(first_line: Tuple[Tuple[float, float], Tuple[float, float]],
     v1 = np.array(second_line[0][::-1]) - np.array(second_line[1][::-1])
     v0 = np.array(first_line[0][::-1]) - np.array(first_line[1][::-1])
     angle = np.math.atan2(np.linalg.det([v0, v1]), np.dot(v0, v1))
-    deg: float = np.degrees(angle) % 180
+    deg = np.degrees(angle) % 180
     return deg
 
 
@@ -455,7 +445,7 @@ def remove_redundant_segments(outline: List[Line]) -> None:
 
 
 def get_contours(masks: np.ndarray) -> List[List[Tuple[int, int]]]:
-    contours: List[List[Tuple[int, int]]] = []
+    contours = []
     for i in range(masks.shape[-1]):
         mask = masks[:, :, i]
         points = get_contour(mask)
@@ -666,24 +656,6 @@ class MarchingSquares:
                     if newcount > maxcount:
                         maxcount = newcount
 
-                    # a = np.cos(theta)
-                    # b = np.sin(theta)
-                    # x0 = a * rho
-                    # y0 = b * rho
-                    # x1 = int(x0 + 1000 * -b)
-                    # y1 = int(y0 + 1000 * a)
-                    # x2 = int(x0 - 1000 * -b)
-                    # y2 = int(y0 - 1000 * a)
-                    # if not nearest_point:
-                    #     dist = None
-                    #     ls = LineString([(x1, y1), (x2, y2)])
-                    #     for px, py in self._points:
-                    #         p = geometry.Point(px, py)
-                    #         new_dist = p.distance(ls)
-                    #         if not nearest_point or new_dist < dist:
-                    #             nearest_point = p
-                    #             dist = new_dist
-
             angle_sum = 0
             counts = 0
             for a in angles:
@@ -697,8 +669,8 @@ class MarchingSquares:
         if not self._marched:
             raise RuntimeError("To get the main orientation, run 'find_contour' first.")
 
-        nearest_point: geometry.Point = None
-        weighted_avg: int = self._get_main_orientation(angle_in_degrees=angle_in_degrees)
+        nearest_point = None
+        weighted_avg = self._get_main_orientation(angle_in_degrees=angle_in_degrees)
         return weighted_avg, nearest_point
 
     @staticmethod
@@ -728,6 +700,7 @@ class MarchingSquares:
             self._states[r, c] = cell_state
             if not self._start and 0 < cell_state < 15:
                 self._start = (r, c)
+
 
 def _get_abs(p: Tuple[float, float], offset_x, offset_y, per_pixel_width, per_pixel_height) -> Tuple[float, float]:
     return offset_x + p[0] * per_pixel_width, offset_y + p[1] * per_pixel_height
