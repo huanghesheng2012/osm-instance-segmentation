@@ -1,6 +1,6 @@
-from PIL import Image, ImageDraw
+from PIL import Image
 from itertools import groupby
-from typing import Iterable, Tuple, Collection, List, Dict
+from typing import Iterable, Tuple, List
 from shapely.geometry import LineString, Point
 from shapely.affinity import rotate, scale
 from shapely import geometry
