@@ -22,15 +22,15 @@ def evaluate():
     #     submission_file = json.loads(data)
     results = ground_truth_annotations.loadRes(predictions_path)
     cocoEval = COCOeval(ground_truth_annotations, results, 'segm')
-    # for image_id in ids:
-    #     iou = cocoEval.computeIoU(image_id, 100)
-    #     print("IoU: {}".format(iou))
 
     cocoEval.evaluate()
     cocoEval.accumulate()
     average_precision = cocoEval._summarize(ap=1, iouThr=0.5, areaRng="all", maxDets=100)
     average_recall = cocoEval._summarize(ap=0, iouThr=0.5, areaRng="all", maxDets=100)
     print("Average Precision : {} || Average Recall : {}".format(average_precision, average_recall))
+    for image_id in ids:
+        iou = cocoEval.computeIoU(image_id, 100)
+        print("IoU: {}".format(iou))
 
 
 if __name__ == "__main__":
