@@ -41,5 +41,5 @@ if __name__ == "__main__":
     if os.path.isfile(images_path):
         os.remove(images_path)
 
-    test_images("eval_predictions.json", "eval_tested_images.txt", 2, VALIDATION_DATA_DIR)
+    test_images("eval_predictions.json", "eval_tested_images.txt", 5, VALIDATION_DATA_DIR)
     evaluate()

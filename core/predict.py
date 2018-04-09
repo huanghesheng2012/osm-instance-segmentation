@@ -83,7 +83,7 @@ class Predictor:
 
 
 def test_images(annotations_file_name="predictions.json", processed_images_name="tested_images.txt", nr_images=None, target_dir=TEST_DATA_DIR):
-    predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
+    predictor = Predictor(os.path.join(os.getcwd(), "model", "osm20180407T1301", "mask_rcnn_osm_0232.h5"))
     annotations_path = os.path.join(os.getcwd(), annotations_file_name)
     images = glob.glob(os.path.join(target_dir, "**/*.jpg"), recursive=True)
     if nr_images:
@@ -125,8 +125,8 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             print("An error occured: " + str(e))
 
         for contour, score in point_sets_with_score:
-            xs = list(map(lambda pt: int(pt[0])-10, contour))  # -10 padding
-            ys = list(map(lambda pt: int(pt[1])-10, contour))
+            xs = list(map(lambda pt: int(pt[0])-0, contour))  # -10 padding
+            ys = list(map(lambda pt: int(pt[1])+0, contour))
             if contour:
                 bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
             else:
