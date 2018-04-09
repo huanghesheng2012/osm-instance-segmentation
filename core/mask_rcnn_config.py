@@ -100,29 +100,34 @@ class OsmMappingDataset(utils.Dataset):
 
 
 class InMemoryDataset(OsmMappingDataset):
-    def __init__(self, path):
+    def __init__(self, path, limit=None, annotation_filename="annotation.json"):
         OsmMappingDataset.__init__(self)
         self._cache = {}
         print("Dataset: InMemoryDataset")
         self.no_logging = False
         self.path = path
-        self.coco = COCO(os.path.join(path, "annotation.json"))
+        self.coco = COCO(os.path.join(path, annotation_filename))
+        self.limit = limit
+        self.coco_image_ids = None
 
     def get_mask_from_annotation(self, img):
         annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
         annotations = self.coco.loadAnns(annotation_ids)
-        rle = cocomask.frPyObjects(annotations[0]['segmentation'], img['height'], img['width'])
-        m = cocomask.decode(rle)
-        # m.shape has a shape of (300, 300, 1)
-        # so we first convert it to a shape of (300, 300)
-        m = m.reshape((img['height'], img['width']))
-        return self.get_mask_from_array(m)
+        all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
+        # print("nr annotations: ", len(annotations))
+        for ann in annotations:
+            rle = cocomask.frPyObjects(ann['segmentation'], img['height'], img['width'])
+            m = cocomask.decode(rle)
+            m = m.reshape((img['height'], img['width']))
+            all_instances[np.where(m > 0)] = 255
+        return self.get_mask_from_array(all_instances)
 
     @staticmethod
     def get_mask_from_array(arr) -> Tuple[np.ndarray, np.ndarray]:
         instances = get_instances_from_array(arr)
         class_ids = np.zeros(len(instances), np.int32)
 
+        # print("Nr instances:", len(instances))
         mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(instances)], dtype=np.uint8)
         for i, inst in enumerate(instances):
             class_ids[i] = osm_class_ids["building"]
@@ -131,6 +136,7 @@ class InMemoryDataset(OsmMappingDataset):
 
     def load(self):
         image_ids = self.coco.getImgIds(catIds=self.coco.getCatIds())
+        self.coco_image_ids = image_ids
         images = self.coco.loadImgs(image_ids)
 
         self.add_class("osm", 0, "building")
@@ -139,6 +145,9 @@ class InMemoryDataset(OsmMappingDataset):
         progress = 0
         total_nr_images = len(images)
         for idx, coco_img in enumerate(images):
+            if self.limit and idx >= self.limit:
+                break
+
             image_path = os.path.join(self.path, "images", coco_img["file_name"])
             img = self._get_image(path=image_path)
             msk = self.get_mask_from_annotation(coco_img)

@@ -19,4 +19,4 @@ widgetsnbextension
 ipywidgets
 matplotlib
 Cython
-# pycocotools
+pycocotools
