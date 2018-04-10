@@ -85,9 +85,9 @@ class Predictor:
     def predict_paths(self, all_paths: List[str], extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
         all_images = []
         for p in all_paths:
-            # img = Image.open(p)
-            # data = np.asarray(img, dtype="uint8")
-            data = cv2.imread(p, 0)
+            img = Image.open(p)
+            data = np.asarray(img, dtype="uint8")
+            # data = cv2.imread(p, 0)
             all_images.append(data)
         return self.predict_arrays(images=all_images, extent=extent, verbose=verbose)
 
