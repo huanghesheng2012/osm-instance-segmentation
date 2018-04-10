@@ -11,6 +11,7 @@ from core.settings import IMAGE_WIDTH
 import numpy as np
 import json
 import cv2
+import math
 
 
 class Predictor:
@@ -19,7 +20,7 @@ class Predictor:
     class InferenceConfig(config.__class__):
         # Run detection on one image at a time
         GPU_COUNT = 1
-        IMAGES_PER_GPU = 1
+        IMAGES_PER_GPU = 30
         IMAGE_MIN_DIM = 320
         IMAGE_MAX_DIM = 320
 
@@ -34,24 +35,30 @@ class Predictor:
         if not tile:
             tile = (0, 0)
 
+        BATCH_SIZE = 30
+
         if not self._model:
             print("Loading model")
             inference_config = self.InferenceConfig()
-            inference_config.IMAGES_PER_GPU = len(images)
-            inference_config.BATCH_SIZE = inference_config.IMAGES_PER_GPU
             print("Predicting {} images".format(len(images)))
             # Create model in training mode
             model = modellib.MaskRCNN(mode="inference", config=inference_config, model_dir="log")
             model.load_weights(self.weights_path, by_name=True)
             self._model = model
 
+        all_prediction_results = []
         model = self._model
-        print("Predicting...")
-        results = model.detect(images, verbose=verbose)
-        print("Prediction done")
+        batches = math.ceil(len(images) / BATCH_SIZE)
+        for i in range(batches):
+            start = i * BATCH_SIZE
+            end = start + BATCH_SIZE
+            img_batch = images[start:end]
+            print("Predicting batch {}/{}".format(i, batches))
+            results = model.detect(img_batch, verbose=verbose)
+            all_prediction_results.extend(results)
         print("Extracting contours...")
         point_sets = []
-        for res in results:
+        for res in all_prediction_results:
             masks = res['masks']
             for i in range(masks.shape[-1]):
                 mask = masks[:, :, i]
@@ -135,4 +142,5 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
 
 
 if __name__ == "__main__":
-    test_images(nr_images=30)
+    # test_images(nr_images=30)
+    test_images()
