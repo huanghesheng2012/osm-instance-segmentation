@@ -104,57 +104,31 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             data = f.read()
             if data:
                 annotations = json.loads(data)
-    progress = 0
-    nr_images = float(len(images))
-    processed_images_path = os.path.join(os.getcwd(), processed_images_name)
-    processed_images = []
-    if os.path.isfile(processed_images_path):
-        with open(processed_images_path, 'r', encoding="utf-8") as f:
-            lines = f.readlines()
-            processed_images = list(map(lambda l: l[:-1], lines))  # remove '\n'
 
-    for idx, img_path in enumerate(images):
-        new_progress = 100*idx / nr_images
-        if new_progress > progress:
-            progress = new_progress
-            print("Progress: {}%".format(progress))
-            sys.stdout.flush()
-        if img_path in processed_images:
-            continue
+    point_sets_with_score = predictor.predict_paths(images, verbose=0)
 
-        with open(processed_images_path, 'a') as f:
-            f.write("{}\n".format(img_path))
-
-        point_sets_with_score = [([], 0)]
-        try:
-            point_sets_with_score = predictor.predict_path(img_path, verbose=0)
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            print("An error occured: " + str(e))
-
-        for contour, score in point_sets_with_score:
-            xs = list(map(lambda pt: int(pt[0])-0, contour))  # -10 padding
-            ys = list(map(lambda pt: int(pt[1])+0, contour))
-            if contour:
-                bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
-            else:
-                bbox = []
-            points_sequence = []
-            for idx, x in enumerate(xs):
-                points_sequence.append(x)
-                points_sequence.append(ys[idx])
-            ann = {
-                "image_id": int(os.path.basename(img_path).replace(".jpg", "")),
-                "category_id": 100,
-                "segmentation": [points_sequence],
-                "bbox": bbox,
-                "score": float(np.round(score, 2))
-            }
-            if bbox:
-                annotations.append(ann)
-                with open(annotations_path, "w") as fp:
-                    fp.write(json.dumps(annotations))
+    for contour, score in point_sets_with_score:
+        xs = list(map(lambda pt: int(pt[0])-0, contour))  # -10 padding
+        ys = list(map(lambda pt: int(pt[1])+0, contour))
+        if contour:
+            bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
+        else:
+            bbox = []
+        points_sequence = []
+        for idx, x in enumerate(xs):
+            points_sequence.append(x)
+            points_sequence.append(ys[idx])
+        ann = {
+            "image_id": int(os.path.basename('').replace(".jpg", "")),
+            "category_id": 100,
+            "segmentation": [points_sequence],
+            "bbox": bbox,
+            "score": float(np.round(score, 2))
+        }
+        if bbox:
+            annotations.append(ann)
+            with open(annotations_path, "w") as fp:
+                fp.write(json.dumps(annotations))
 
 
 if __name__ == "__main__":
