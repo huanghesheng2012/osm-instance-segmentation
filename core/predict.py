@@ -37,7 +37,9 @@ class Predictor:
         if not self._model:
             print("Loading model")
             inference_config = self.InferenceConfig()
-            inference_config.BATCH_SIZE = len(images)
+            inference_config.IMAGES_PER_GPU = len(images)
+            inference_config.BATCH_SIZE = inference_config.IMAGES_PER_GPU
+            print("Predicting {} images".format(len(images)))
             # Create model in training mode
             model = modellib.MaskRCNN(mode="inference", config=inference_config, model_dir="log")
             model.load_weights(self.weights_path, by_name=True)
@@ -54,7 +56,7 @@ class Predictor:
             for i in range(masks.shape[-1]):
                 mask = masks[:, :, i]
                 points = get_contour(mask)
-                score = res[0]['scores'][i]
+                score = res['scores'][i]
                 point_sets.append((list(points), score))
         print("Contours extracted")
 
@@ -85,9 +87,9 @@ class Predictor:
     def predict_paths(self, all_paths: List[str], extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
         all_images = []
         for p in all_paths:
-            img = Image.open(p)
-            data = np.asarray(img, dtype="uint8")
-            # data = cv2.imread(p, 0)
+            #img = Image.open(p)
+            #data = np.asarray(img, dtype="uint8")
+            data = cv2.imread(p)
             all_images.append(data)
         return self.predict_arrays(images=all_images, extent=extent, verbose=verbose)
 
@@ -133,4 +135,4 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
 
 
 if __name__ == "__main__":
-    test_images()
+    test_images(nr_images=30)
