@@ -10,6 +10,7 @@ from PIL import Image
 from core.settings import IMAGE_WIDTH
 import numpy as np
 import json
+import cv2
 
 
 class Predictor:
@@ -28,7 +29,7 @@ class Predictor:
         self.weights_path = weights_path
         self._model = None
 
-    def predict_array(self, img_data: np.ndarray, extent=None, do_rectangularization=True, tile=None, verbose=1) \
+    def predict_arrays(self, images: List[np.ndarray], extent=None, do_rectangularization=True, tile=None, verbose=1) \
             -> List[List[Tuple[int, int]]]:
         if not tile:
             tile = (0, 0)
@@ -43,16 +44,17 @@ class Predictor:
 
         model = self._model
         print("Predicting...")
-        res = model.detect([img_data], verbose=verbose)
+        results = model.detect(images, verbose=verbose)
         print("Prediction done")
         print("Extracting contours...")
         point_sets = []
-        masks = res[0]['masks']
-        for i in range(masks.shape[-1]):
-            mask = masks[:, :, i]
-            points = get_contour(mask)
-            score = res[0]['scores'][i]
-            point_sets.append((list(points), score))
+        for res in results:
+            masks = res['masks']
+            for i in range(masks.shape[-1]):
+                mask = masks[:, :, i]
+                points = get_contour(mask)
+                score = res[0]['scores'][i]
+                point_sets.append((list(points), score))
         print("Contours extracted")
 
         rectangularized_outlines = []
@@ -77,9 +79,16 @@ class Predictor:
         return rectangularized_outlines
 
     def predict_path(self, img_path: str, extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
-        img = Image.open(img_path)
-        data = np.asarray(img, dtype="uint8")
-        return self.predict_array(img_data=data, extent=extent, verbose=verbose)
+        return self.predict_paths([img_path], extent=extent, verbose=verbose)
+
+    def predict_paths(self, all_paths: List[str], extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
+        all_images = []
+        for p in all_paths:
+            # img = Image.open(p)
+            # data = np.asarray(img, dtype="uint8")
+            data = cv2.imread(p, 0)
+            all_images.append(data)
+        return self.predict_arrays(images=all_images, extent=extent, verbose=verbose)
 
 
 def test_images(annotations_file_name="predictions.json", processed_images_name="tested_images.txt", nr_images=None, target_dir=TEST_DATA_DIR):

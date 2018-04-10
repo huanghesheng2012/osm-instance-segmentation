@@ -6,6 +6,7 @@ from core.settings import IMAGE_WIDTH
 from typing import Tuple
 import os
 import numpy as np
+import cv2
 from PIL import Image
 from pycocotools.coco import COCO
 from pycocotools import mask as cocomask
@@ -67,10 +68,9 @@ class OsmMappingDataset(utils.Dataset):
         print("Loaded.")
 
     def _get_image(self, path: str) -> np.ndarray:
-        # info = self.image_info[path]
-        # image_path = info["path"]
-        img = Image.open(path)
-        data = np.asarray(img, dtype="uint8")
+        # img = Image.open(path)
+        # data = np.asarray(img, dtype="uint8")
+        data = cv2.imread(path, 0)
         return data
 
     def _get_mask(self, mask_path: str) -> Tuple[np.ndarray, np.ndarray]:
