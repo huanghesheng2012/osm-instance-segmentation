@@ -37,6 +37,7 @@ class Predictor:
         if not self._model:
             print("Loading model")
             inference_config = self.InferenceConfig()
+            inference_config.BATCH_SIZE = len(images)
             # Create model in training mode
             model = modellib.MaskRCNN(mode="inference", config=inference_config, model_dir="log")
             model.load_weights(self.weights_path, by_name=True)
