@@ -2442,8 +2442,10 @@ class MaskRCNN():
             for image in images:
                 log("image", image)
 
+        print("Molding inputs")
         # Mold inputs to format expected by the neural network
         molded_images, image_metas, windows = self.mold_inputs(images)
+        print("Inputs molded")
 
         # Validate image sizes
         # All images in a batch MUST be of the same size
