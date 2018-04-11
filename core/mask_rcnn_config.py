@@ -71,7 +71,7 @@ class OsmMappingDataset(utils.Dataset):
         # img = Image.open(path)
         # data = np.asarray(img, dtype="uint8")
         data = cv2.imread(path)
-        print(data.shape)
+        # print(data.shape)
         return data
 
     def _get_mask(self, mask_path: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -133,7 +133,7 @@ class InMemoryDataset(OsmMappingDataset):
     def get_mask_from_array(arr) -> Tuple[np.ndarray, np.ndarray]:
         instances = get_instances_from_array(arr)
         class_ids = np.zeros(len(instances), np.int32)
-        print("Nr instances:", len(instances))
+        # print("Nr instances:", len(instances))
         mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(instances)], dtype=np.uint8)
         for i, inst in enumerate(instances):
             class_ids[i] = osm_class_ids["building"]
