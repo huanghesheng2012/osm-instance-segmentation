@@ -125,13 +125,13 @@ class OsmMappingDataset(utils.Dataset):
 
 class InMemoryDataset(OsmMappingDataset):
     def __init__(self, path, limit=None, annotation_filename="annotation.json"):
-        OsmMappingDataset.__init__(self)
-        self._cache = {}
-        print("Dataset: InMemoryDataset")
-        self.no_logging = False
-        self.path = path
-        self.coco = COCO(os.path.join(path, annotation_filename))
-        self.limit = limit
+        OsmMappingDataset.__init__(self, path=path, limit=limit, annotation_filename=annotation_filename)
+        # self._cache = {}
+        # print("Dataset: InMemoryDataset")
+        # self.no_logging = False
+        # self.path = path
+        # self.coco = COCO(os.path.join(path, annotation_filename))
+        # self.limit = limit
 
     def load(self):
         image_ids = self.coco.getImgIds(catIds=self.coco.getCatIds())
