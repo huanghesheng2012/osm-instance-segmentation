@@ -19,15 +19,16 @@ if not os.path.isdir(TRAINING_DATA_DIR):
 
 
 def get_datasets(no_logging=False):
+    # Validation dataset
+    dataset_val = OsmMappingDataset(VALIDATION_DATA_DIR)
+    dataset_val.load()
+    dataset_val.prepare()
+
     # Training dataset
     dataset_train = InMemoryDataset(TRAINING_DATA_DIR)
     dataset_train.load()
     dataset_train.prepare()
 
-    # Validation dataset
-    dataset_val = OsmMappingDataset(VALIDATION_DATA_DIR)
-    dataset_val.load()
-    dataset_val.prepare()
     return dataset_train, dataset_val
 
 
