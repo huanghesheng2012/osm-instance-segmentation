@@ -114,7 +114,7 @@ class InMemoryDataset(OsmMappingDataset):
         annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
         annotations = self.coco.loadAnns(annotation_ids)
         all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
-        # print("nr annotations: ", len(annotations))
+        print("nr annotations: ", len(annotations))
         for ann in annotations:
             rle = cocomask.frPyObjects(ann['segmentation'], img['height'], img['width'])
             m = cocomask.decode(rle)
@@ -126,8 +126,7 @@ class InMemoryDataset(OsmMappingDataset):
     def get_mask_from_array(arr) -> Tuple[np.ndarray, np.ndarray]:
         instances = get_instances_from_array(arr)
         class_ids = np.zeros(len(instances), np.int32)
-
-        # print("Nr instances:", len(instances))
+        print("Nr instances:", len(instances))
         mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(instances)], dtype=np.uint8)
         for i, inst in enumerate(instances):
             class_ids[i] = osm_class_ids["building"]
