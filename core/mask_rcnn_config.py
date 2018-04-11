@@ -70,7 +70,8 @@ class OsmMappingDataset(utils.Dataset):
     def _get_image(self, path: str) -> np.ndarray:
         # img = Image.open(path)
         # data = np.asarray(img, dtype="uint8")
-        data = cv2.imread(path, 0)
+        data = cv2.imread(path)
+        print(data.shape)
         return data
 
     def _get_mask(self, mask_path: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -113,14 +114,20 @@ class InMemoryDataset(OsmMappingDataset):
     def get_mask_from_annotation(self, img):
         annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
         annotations = self.coco.loadAnns(annotation_ids)
-        all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
-        print("nr annotations: ", len(annotations))
-        for ann in annotations:
+        # all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
+        # print("nr annotations: ", len(annotations))
+
+        class_ids = np.zeros(len(annotations), np.int32)
+        # print("Nr instances:", len(annotations))
+        mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(annotations)], dtype=np.uint8)
+
+        for i, ann in enumerate(annotations):
             rle = cocomask.frPyObjects(ann['segmentation'], img['height'], img['width'])
             m = cocomask.decode(rle)
             m = m.reshape((img['height'], img['width']))
-            all_instances[np.where(m > 0)] = 255
-        return self.get_mask_from_array(all_instances)
+            mask[:, :, i] = m
+            class_ids[i] = osm_class_ids["building"]
+        return mask, class_ids
 
     @staticmethod
     def get_mask_from_array(arr) -> Tuple[np.ndarray, np.ndarray]:
