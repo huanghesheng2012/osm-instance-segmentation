@@ -1,7 +1,6 @@
 import os
-from core.mask_rcnn_config import MyMaskRcnnConfig, InMemoryDataset, VALIDATION_DATA_DIR, TRAINING_DATA_DIR
+from core.mask_rcnn_config import MyMaskRcnnConfig, InMemoryDataset, OsmMappingDataset, VALIDATION_DATA_DIR, TRAINING_DATA_DIR
 from mask_rcnn import model as modellib, utils
-import glob
 from core.settings import IMAGE_OUTPUT_FOLDER
 
 ROOT_DIR = os.getcwd()
@@ -20,16 +19,13 @@ if not os.path.isdir(TRAINING_DATA_DIR):
 
 
 def get_datasets(no_logging=False):
-    training_images = glob.glob(os.path.join(TRAINING_DATA_DIR, "**/*.jpg"), recursive=True)
-    validation_images = glob.glob(os.path.join(VALIDATION_DATA_DIR, "**/*.jpg"), recursive=True)
-
     # Training dataset
     dataset_train = InMemoryDataset(TRAINING_DATA_DIR)
     dataset_train.load()
     dataset_train.prepare()
 
     # Validation dataset
-    dataset_val = InMemoryDataset(VALIDATION_DATA_DIR)
+    dataset_val = OsmMappingDataset(VALIDATION_DATA_DIR)
     dataset_val.load()
     dataset_val.prepare()
     return dataset_train, dataset_val
