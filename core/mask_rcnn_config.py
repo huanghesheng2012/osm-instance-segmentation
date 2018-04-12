@@ -108,12 +108,12 @@ class OsmMappingDataset(utils.Dataset):
         annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
         annotations = self.coco.loadAnns(annotation_ids)
         # all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
-        print("nr annotations: ", len(annotations))
+        # print("nr annotations: ", len(annotations))
 
         annotations = list(filter(lambda a: a["area"] >= 100, annotations))
 
         class_ids = np.zeros(len(annotations), np.int32)
-        print("Nr instances:", len(annotations))
+        # print("Nr instances:", len(annotations))
         mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(annotations)], dtype=np.uint8)
 
         for i, ann in enumerate(annotations):
