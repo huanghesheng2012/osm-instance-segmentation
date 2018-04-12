@@ -76,7 +76,9 @@ class Predictor:
             for i in range(masks.shape[-1]):
                 mask = masks[:, :, i]
                 points = get_contour(mask)
-                score = res['scores'][i]
+                score = 1
+                if len(res['scores'] > i):
+                    score = res['scores'][i]
                 point_sets.append((list(points), score, coco_img_id))
         print("Contours extracted")
         return point_sets
