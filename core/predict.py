@@ -144,7 +144,6 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             "score": float(np.round(score, 2))
         }
         annotations.append(ann)
-        print(annotations)
         with open(annotations_path, "w") as fp:
             json.dump(annotations, fp)
 
