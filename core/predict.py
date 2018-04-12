@@ -73,7 +73,7 @@ class Predictor:
                 masks = res['masks']
                 for i in range(masks.shape[-1]):
                     mask = masks[:, :, i]
-                    segmentation = cocomask.encode(np.asfortranarray(mask))
+                    segmentation = cocomask.encode(np.asfortranarray(mask, dtype=np.uint8))
                     # points = get_contour(mask)
                     score = 1
                     if len(res['scores'] > i):
