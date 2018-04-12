@@ -30,7 +30,7 @@ class Predictor:
         self.weights_path = weights_path
         self._model = None
 
-    def predict_arrays(self, images: List[np.ndarray], extent=None, do_rectangularization=True, tile=None, verbose=1) \
+    def predict_arrays(self, images: List[Tuple[np.ndarray, str]], extent=None, do_rectangularization=True, tile=None, verbose=1) \
             -> List[List[Tuple[int, int]]]:
         if not tile:
             tile = (0, 0)
@@ -52,41 +52,26 @@ class Predictor:
         for i in range(batches):
             start = i * BATCH_SIZE
             end = start + BATCH_SIZE
-            img_batch = images[start:end]
+            img_with_id_batch = images[start:end]
             print("Predicting batch {}/{}".format(i, batches))
+            img_batch = list(map(lambda i: i[0], img_with_id_batch))
+            id_batch = list(map(lambda i: i[1], img_with_id_batch))
             results = model.detect(img_batch, verbose=verbose)
-            all_prediction_results.extend(results)
+            # result_with_image_id = []
+            for i, res in enumerate(results):
+                all_prediction_results.append((res, id_batch[i]))
+            # all_prediction_results.extend(results)
         print("Extracting contours...")
         point_sets = []
-        for res in all_prediction_results:
+        for res, coco_img_id in all_prediction_results:
             masks = res['masks']
             for i in range(masks.shape[-1]):
                 mask = masks[:, :, i]
                 points = get_contour(mask)
                 score = res['scores'][i]
-                point_sets.append((list(points), score))
+                point_sets.append((list(points), score, coco_img_id))
         print("Contours extracted")
-
-        rectangularized_outlines = []
-        if do_rectangularization:
-            point_sets = list(map(lambda point_set_with_score: (rectangularize(point_set_with_score[0]), point_set_with_score[1]), point_sets))
-
-        point_sets_mapped = []
-        col, row = tile
-        for points, score in point_sets:
-            pp = list(map(lambda p: (p[0]+col*256, p[1]+row*256), points))
-            if pp:
-                point_sets_mapped.append((pp, score))
-        point_sets = point_sets_mapped
-
-        if not extent:
-            rectangularized_outlines = point_sets
-        else:
-            for o, score in point_sets:
-                georeffed = georeference(o, extent)
-                if georeffed:
-                    rectangularized_outlines.append((georeffed, score))
-        return rectangularized_outlines
+        return point_sets
 
     def predict_path(self, img_path: str, extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
         return self.predict_paths([img_path], extent=extent, verbose=verbose)
@@ -97,7 +82,8 @@ class Predictor:
             #img = Image.open(p)
             #data = np.asarray(img, dtype="uint8")
             data = cv2.imread(p)
-            all_images.append(data)
+            coco_img_id = int(os.path.basename('').replace(".jpg", ""))
+            all_images.append((data, coco_img_id))
         return self.predict_arrays(images=all_images, extent=extent, verbose=verbose)
 
 
@@ -106,7 +92,7 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
     annotations_path = os.path.join(os.getcwd(), annotations_file_name)
     images = glob.glob(os.path.join(target_dir, "**/*.jpg"), recursive=True)
     if nr_images:
-        random.shuffle(images)
+        # random.shuffle(images)
         images = images[:nr_images]
     annotations = []
     if os.path.isfile(annotations_path):
@@ -117,7 +103,7 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
 
     point_sets_with_score = predictor.predict_paths(images, verbose=0)
 
-    for contour, score in point_sets_with_score:
+    for contour, score, coco_img_id in point_sets_with_score:
         xs = list(map(lambda pt: int(pt[0])-0, contour))  # -10 padding
         ys = list(map(lambda pt: int(pt[1])+0, contour))
         if contour:
@@ -129,7 +115,7 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             points_sequence.append(x)
             points_sequence.append(ys[idx])
         ann = {
-            "image_id": int(os.path.basename('').replace(".jpg", "")),
+            "image_id": coco_img_id,
             "category_id": 100,
             "segmentation": [points_sequence],
             "bbox": bbox,
