@@ -12,6 +12,7 @@ import numpy as np
 import json
 import cv2
 import math
+from pycocotools import mask as cocomask
 
 
 class Predictor:
@@ -72,11 +73,12 @@ class Predictor:
                 masks = res['masks']
                 for i in range(masks.shape[-1]):
                     mask = masks[:, :, i]
-                    points = get_contour(mask)
+                    segmentation = cocomask.encode(mask)
+                    # points = get_contour(mask)
                     score = 1
                     if len(res['scores'] > i):
                         score = res['scores'][i]
-                    point_sets.append((list(points), score, id_batch[i]))
+                    point_sets.append((segmentation, score, id_batch[i]))
             print("Contours extracted")
 
         # print("Extracting contours...")
@@ -123,21 +125,22 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
 
     point_sets_with_score = predictor.predict_paths(images, verbose=0)
 
-    for contour, score, coco_img_id in point_sets_with_score:
-        xs = list(map(lambda pt: int(pt[0])-0, contour))  # -10 padding
-        ys = list(map(lambda pt: int(pt[1])+0, contour))
-        if contour:
-            bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
-        else:
-            bbox = []
-        points_sequence = []
-        for idx, x in enumerate(xs):
-            points_sequence.append(x)
-            points_sequence.append(ys[idx])
+    for segment, score, coco_img_id in point_sets_with_score:
+        # xs = list(map(lambda pt: int(pt[0])-0, segment))  # -10 padding
+        # ys = list(map(lambda pt: int(pt[1])+0, segment))
+        bbox = cocomask.toBbox(segment)
+        # if segment:
+        #     bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
+        # else:
+        #     bbox = []
+        # points_sequence = []
+        # for idx, x in enumerate(xs):
+        #     points_sequence.append(x)
+        #     points_sequence.append(ys[idx])
         ann = {
             "image_id": coco_img_id,
             "category_id": 100,
-            "segmentation": [points_sequence],
+            "segmentation": segment,
             "bbox": bbox,
             "score": float(np.round(score, 2))
         }
