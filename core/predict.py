@@ -82,7 +82,7 @@ class Predictor:
             #img = Image.open(p)
             #data = np.asarray(img, dtype="uint8")
             data = cv2.imread(p)
-            coco_img_id = int(os.path.basename('').replace(".jpg", ""))
+            coco_img_id = int(os.path.basename(p).replace(".jpg", ""))
             all_images.append((data, coco_img_id))
         return self.predict_arrays(images=all_images, extent=extent, verbose=verbose)
 
@@ -128,5 +128,5 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
 
 
 if __name__ == "__main__":
-    # test_images(nr_images=30)
-    test_images()
+    test_images(nr_images=4)
+    # test_images()
