@@ -151,5 +151,5 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
 
 
 if __name__ == "__main__":
-    test_images(nr_images=4)
-    # test_images()
+    # test_images(nr_images=4)
+    test_images()
