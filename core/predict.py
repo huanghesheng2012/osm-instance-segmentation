@@ -51,6 +51,7 @@ class Predictor:
         all_prediction_results = []
         model = self._model
         batches = math.ceil(len(images) / BATCH_SIZE)
+        point_sets = []
         for i in range(batches):
             start = i * BATCH_SIZE
             end = start + BATCH_SIZE
@@ -65,22 +66,31 @@ class Predictor:
             img_batch = list(map(lambda i: i[0], img_with_id_batch))
             id_batch = list(map(lambda i: i[1], img_with_id_batch))
             results = model.detect(img_batch, verbose=verbose)
-            # result_with_image_id = []
+            print("Extracting contours...")
             for i, res in enumerate(results):
-                all_prediction_results.append((res, id_batch[i]))
-            # all_prediction_results.extend(results)
-        print("Extracting contours...")
-        point_sets = []
-        for res, coco_img_id in all_prediction_results:
-            masks = res['masks']
-            for i in range(masks.shape[-1]):
-                mask = masks[:, :, i]
-                points = get_contour(mask)
-                score = 1
-                if len(res['scores'] > i):
-                    score = res['scores'][i]
-                point_sets.append((list(points), score, coco_img_id))
-        print("Contours extracted")
+                # all_prediction_results.append((res, id_batch[i]))
+                masks = res['masks']
+                for i in range(masks.shape[-1]):
+                    mask = masks[:, :, i]
+                    points = get_contour(mask)
+                    score = 1
+                    if len(res['scores'] > i):
+                        score = res['scores'][i]
+                    point_sets.append((list(points), score, id_batch[i]))
+            print("Contours extracted")
+
+        # print("Extracting contours...")
+        # point_sets = []
+        # for res, coco_img_id in all_prediction_results:
+        #     masks = res['masks']
+        #     for i in range(masks.shape[-1]):
+        #         mask = masks[:, :, i]
+        #         points = get_contour(mask)
+        #         score = 1
+        #         if len(res['scores'] > i):
+        #             score = res['scores'][i]
+        #         point_sets.append((list(points), score, coco_img_id))
+        # print("Contours extracted")
         return point_sets
 
     def predict_path(self, img_path: str, extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
