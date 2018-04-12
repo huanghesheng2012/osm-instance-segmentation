@@ -113,27 +113,16 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
     if nr_images:
         # random.shuffle(images)
         images = images[:nr_images]
-    annotations = []
-    if os.path.isfile(annotations_path):
-        with open(annotations_path, 'r', encoding="utf-8") as f:
-            data = f.read()
-            if data:
-                annotations = json.loads(data)
 
     point_sets_with_score = predictor.predict_paths(images, verbose=0)
 
+    annotations = []
+    count = 0
+    print("Creating annotations")
     for segment, score, coco_img_id in point_sets_with_score:
-        # xs = list(map(lambda pt: int(pt[0])-0, segment))  # -10 padding
-        # ys = list(map(lambda pt: int(pt[1])+0, segment))
+        count += 1
+        print("Creating annotation {}/{}".format(count, len(point_sets_with_score)))
         bbox = cocomask.toBbox(segment)
-        # if segment:
-        #     bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
-        # else:
-        #     bbox = []
-        # points_sequence = []
-        # for idx, x in enumerate(xs):
-        #     points_sequence.append(x)
-        #     points_sequence.append(ys[idx])
         seg = segment
         seg["counts"] = seg["counts"].decode('utf-8')
         ann = {
@@ -141,11 +130,11 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
             "category_id": 100,
             "segmentation": seg,
             "bbox": bbox.tolist(),
-            "score": float(np.round(score, 2))
+            "score": float(score)
         }
         annotations.append(ann)
-        with open(annotations_path, "w") as fp:
-            json.dump(annotations, fp)
+    with open(annotations_path, "w") as fp:
+        json.dump(annotations, fp)
 
 
 if __name__ == "__main__":
