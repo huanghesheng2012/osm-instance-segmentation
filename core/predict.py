@@ -1,13 +1,9 @@
 import os
 import sys
 import glob
-import random
 from mask_rcnn import model as modellib
 from core.mask_rcnn_config import MyMaskRcnnConfig, TEST_DATA_DIR
-from core.utils import georeference, rectangularize, get_contours, get_contour
-from typing import Iterable, Tuple, List
-from PIL import Image
-from core.settings import IMAGE_WIDTH
+from typing import Tuple, List
 import numpy as np
 import json
 import cv2
@@ -138,18 +134,30 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
         # for idx, x in enumerate(xs):
         #     points_sequence.append(x)
         #     points_sequence.append(ys[idx])
+        seg = segment
+        seg["counts"] = seg["counts"].decode('utf-8')
         ann = {
             "image_id": coco_img_id,
             "category_id": 100,
-            "segmentation": segment,
-            "bbox": bbox,
+            "segmentation": seg,
+            "bbox": bbox.tolist(),
             "score": float(np.round(score, 2))
         }
         annotations.append(ann)
+        print(annotations)
         with open(annotations_path, "w") as fp:
-            fp.write(json.dumps(annotations))
+            json.dump(annotations, fp)
 
 
 if __name__ == "__main__":
+    nr_images = None
+    path = TEST_DATA_DIR
+    if len(sys.argv) > 1:
+        nr_images = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        path = sys.argv[2]
+    print(sys.argv)
+
+    test_images(nr_images=nr_images, target_dir=path)
     # test_images(nr_images=4)
-    test_images()
+    # test_images()
