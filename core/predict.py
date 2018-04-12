@@ -66,7 +66,7 @@ class Predictor:
             print("Predicting batch {}/{}".format(i, batches))
             img_batch = list(map(lambda i: i[0], img_with_id_batch))
             id_batch = list(map(lambda i: i[1], img_with_id_batch))
-            results = model.detect(img_batch, verbose=verbose)
+            results = model.detect(img_batch, image_ids=id_batch, verbose=verbose)
             print("Extracting contours...")
             for i, res in enumerate(results):
                 # all_prediction_results.append((res, id_batch[i]))
@@ -78,7 +78,8 @@ class Predictor:
                     score = 1
                     if len(res['scores'] > i):
                         score = res['scores'][i]
-                    point_sets.append((segmentation, score, id_batch[i]))
+                    coco_id = res['coco_id']
+                    point_sets.append((segmentation, score, coco_id))
             print("Contours extracted")
 
         # print("Extracting contours...")
