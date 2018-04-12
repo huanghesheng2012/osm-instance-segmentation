@@ -108,10 +108,12 @@ class OsmMappingDataset(utils.Dataset):
         annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
         annotations = self.coco.loadAnns(annotation_ids)
         # all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
-        # print("nr annotations: ", len(annotations))
+        print("nr annotations: ", len(annotations))
+
+        annotations = list(filter(lambda a: a["area"] >= 100, annotations))
 
         class_ids = np.zeros(len(annotations), np.int32)
-        # print("Nr instances:", len(annotations))
+        print("Nr instances:", len(annotations))
         mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(annotations)], dtype=np.uint8)
 
         for i, ann in enumerate(annotations):
@@ -121,6 +123,34 @@ class OsmMappingDataset(utils.Dataset):
             mask[:, :, i] = m
             class_ids[i] = osm_class_ids["building"]
         return mask, class_ids
+
+    # @staticmethod
+    # def get_mask_from_array(arr) -> Tuple[np.ndarray, np.ndarray]:
+    #     instances = get_instances_from_array(arr)
+    #     class_ids = np.zeros(len(instances), np.int32)
+    #
+    #     print("Nr instances:", len(instances))
+    #     mask = np.zeros([IMAGE_WIDTH, IMAGE_WIDTH, len(instances)], dtype=np.uint8)
+    #     for i, inst in enumerate(instances):
+    #         class_ids[i] = osm_class_ids["building"]
+    #         mask[:, :, i] = inst
+    #     return mask, class_ids
+    #
+    # def get_mask_from_annotation(self, img):
+    #     annotation_ids = self.coco.getAnnIds(imgIds=img['id'])
+    #     annotations = self.coco.loadAnns(annotation_ids)
+    #     # if len(annotations) == 4:
+    #     #     print(annotations)
+    #     all_instances = np.zeros((img['height'], img['width']), dtype=np.uint8)
+    #     print("nr annotations: ", len(annotations))
+    #     for ann in annotations:
+    #         if ann["area"] >= 100:
+    #             rle = cocomask.frPyObjects(ann['segmentation'], img['height'], img['width'])
+    #             m = cocomask.decode(rle)
+    #             m = m.reshape((img['height'], img['width']))
+    #             # print("max: ", m.max())
+    #             all_instances[np.where(m >= 1)] = 255
+    #     return self.get_mask_from_array(all_instances)
 
 
 class InMemoryDataset(OsmMappingDataset):

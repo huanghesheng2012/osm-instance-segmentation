@@ -1,17 +1,14 @@
 import os
 import sys
 import glob
-import random
 from mask_rcnn import model as modellib
 from core.mask_rcnn_config import MyMaskRcnnConfig, TEST_DATA_DIR
-from core.utils import georeference, rectangularize, get_contours, get_contour
-from typing import Iterable, Tuple, List
-from PIL import Image
-from core.settings import IMAGE_WIDTH
+from typing import Tuple, List
 import numpy as np
 import json
 import cv2
 import math
+from pycocotools import mask as cocomask
 
 
 class Predictor:
@@ -51,6 +48,7 @@ class Predictor:
         all_prediction_results = []
         model = self._model
         batches = math.ceil(len(images) / BATCH_SIZE)
+        point_sets = []
         for i in range(batches):
             start = i * BATCH_SIZE
             end = start + BATCH_SIZE
@@ -64,21 +62,34 @@ class Predictor:
             print("Predicting batch {}/{}".format(i, batches))
             img_batch = list(map(lambda i: i[0], img_with_id_batch))
             id_batch = list(map(lambda i: i[1], img_with_id_batch))
-            results = model.detect(img_batch, verbose=verbose)
-            # result_with_image_id = []
+            results = model.detect(img_batch, image_ids=id_batch, verbose=verbose)
+            print("Extracting contours...")
             for i, res in enumerate(results):
-                all_prediction_results.append((res, id_batch[i]))
-            # all_prediction_results.extend(results)
-        print("Extracting contours...")
-        point_sets = []
-        for res, coco_img_id in all_prediction_results:
-            masks = res['masks']
-            for i in range(masks.shape[-1]):
-                mask = masks[:, :, i]
-                points = get_contour(mask)
-                score = res['scores'][i]
-                point_sets.append((list(points), score, coco_img_id))
-        print("Contours extracted")
+                # all_prediction_results.append((res, id_batch[i]))
+                masks = res['masks']
+                for i in range(masks.shape[-1]):
+                    mask = masks[:, :, i]
+                    segmentation = cocomask.encode(np.asfortranarray(mask, dtype=np.uint8))
+                    # points = get_contour(mask)
+                    score = 1
+                    if len(res['scores'] > i):
+                        score = res['scores'][i]
+                    coco_id = res['coco_id']
+                    point_sets.append((segmentation, score, coco_id))
+            print("Contours extracted")
+
+        # print("Extracting contours...")
+        # point_sets = []
+        # for res, coco_img_id in all_prediction_results:
+        #     masks = res['masks']
+        #     for i in range(masks.shape[-1]):
+        #         mask = masks[:, :, i]
+        #         points = get_contour(mask)
+        #         score = 1
+        #         if len(res['scores'] > i):
+        #             score = res['scores'][i]
+        #         point_sets.append((list(points), score, coco_img_id))
+        # print("Contours extracted")
         return point_sets
 
     def predict_path(self, img_path: str, extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
@@ -102,39 +113,39 @@ def test_images(annotations_file_name="predictions.json", processed_images_name=
     if nr_images:
         # random.shuffle(images)
         images = images[:nr_images]
-    annotations = []
-    if os.path.isfile(annotations_path):
-        with open(annotations_path, 'r', encoding="utf-8") as f:
-            data = f.read()
-            if data:
-                annotations = json.loads(data)
 
     point_sets_with_score = predictor.predict_paths(images, verbose=0)
 
-    for contour, score, coco_img_id in point_sets_with_score:
-        xs = list(map(lambda pt: int(pt[0])-0, contour))  # -10 padding
-        ys = list(map(lambda pt: int(pt[1])+0, contour))
-        if contour:
-            bbox = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
-        else:
-            bbox = []
-        points_sequence = []
-        for idx, x in enumerate(xs):
-            points_sequence.append(x)
-            points_sequence.append(ys[idx])
+    annotations = []
+    count = 0
+    print("Creating annotations")
+    for segment, score, coco_img_id in point_sets_with_score:
+        count += 1
+        print("Creating annotation {}/{}".format(count, len(point_sets_with_score)))
+        bbox = cocomask.toBbox(segment)
+        seg = segment
+        seg["counts"] = seg["counts"].decode('utf-8')
         ann = {
             "image_id": coco_img_id,
             "category_id": 100,
-            "segmentation": [points_sequence],
-            "bbox": bbox,
-            "score": float(np.round(score, 2))
+            "segmentation": seg,
+            "bbox": bbox.tolist(),
+            "score": float(score)
         }
-        if bbox:
-            annotations.append(ann)
-            with open(annotations_path, "w") as fp:
-                fp.write(json.dumps(annotations))
+        annotations.append(ann)
+    with open(annotations_path, "w") as fp:
+        json.dump(annotations, fp)
 
 
 if __name__ == "__main__":
-    test_images(nr_images=4)
+    nr_images = None
+    path = TEST_DATA_DIR
+    if len(sys.argv) > 1:
+        nr_images = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        path = sys.argv[2]
+    print(sys.argv)
+
+    test_images(nr_images=nr_images, target_dir=path)
+    # test_images(nr_images=4)
     # test_images()
