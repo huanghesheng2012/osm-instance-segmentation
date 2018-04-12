@@ -40,6 +40,8 @@ class Predictor:
         if not self._model:
             print("Loading model")
             inference_config = self.InferenceConfig()
+            inference_config.BATCH_SIZE = BATCH_SIZE
+            inference_config.IMAGES_PER_GPU = BATCH_SIZE
             print("Predicting {} images".format(len(images)))
             # Create model in training mode
             model = modellib.MaskRCNN(mode="inference", config=inference_config, model_dir="log")
@@ -53,6 +55,12 @@ class Predictor:
             start = i * BATCH_SIZE
             end = start + BATCH_SIZE
             img_with_id_batch = images[start:end]
+            if len(img_with_id_batch) < BATCH_SIZE:
+                inference_config = self.InferenceConfig()
+                inference_config.BATCH_SIZE = len(img_with_id_batch)
+                inference_config.IMAGES_PER_GPU = len(img_with_id_batch)
+                model = modellib.MaskRCNN(mode="inference", config=inference_config, model_dir="log")
+                model.load_weights(self.weights_path, by_name=True)
             print("Predicting batch {}/{}".format(i, batches))
             img_batch = list(map(lambda i: i[0], img_with_id_batch))
             id_batch = list(map(lambda i: i[1], img_with_id_batch))
