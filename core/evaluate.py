@@ -1,6 +1,6 @@
 import os
 import sys
-from core.mask_rcnn_config import VALIDATION_DATA_DIR
+from core.mask_rcnn_config import VALIDATION_DATA_DIR, TEST_DATA_DIR
 from pycocotools.coco import COCO
 from core.cocoeval import COCOeval
 import json
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     #     os.remove(images_path)
 
     # test_images("predictions.json", "eval_tested_images.txt", 5, VALIDATION_DATA_DIR)
-    annotation_dir = VALIDATION_DATA_DIR
+    annotation_dir = TEST_DATA_DIR
     if len(sys.argv) > 1:
         annotation_dir = sys.argv[1]
 
