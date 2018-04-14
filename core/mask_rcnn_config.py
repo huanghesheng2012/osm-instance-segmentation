@@ -52,6 +52,8 @@ class MyMaskRcnnConfig(Config):
 
     VALIDATION_STEPS = 100  # 60317
 
+    MEAN_PIXEL = np.array([101.2, 89.5, 77.7])
+
 
 class OsmMappingDataset(utils.Dataset):
 
