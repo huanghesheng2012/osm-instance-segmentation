@@ -107,7 +107,7 @@ class Predictor:
 
 
 def test_images(annotations_file_name="predictions.json", processed_images_name="tested_images.txt", nr_images=None, target_dir=TEST_DATA_DIR):
-    predictor = Predictor(os.path.join(os.getcwd(), "model", "osm20180412T1702", "mask_rcnn_osm_0061.h5"))
+    predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
     annotations_path = os.path.join(os.getcwd(), annotations_file_name)
     images = glob.glob(os.path.join(target_dir, "**/*.jpg"), recursive=True)
     if nr_images:
