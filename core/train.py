@@ -84,13 +84,13 @@ def train():
         model.keras_model.save_weights(os.path.join(MODEL_DIR, "stage2.h5"), overwrite=True)
 
     # Finetune layers from ResNet stage 3 and up
-    print("Training all")
-    model.train(train_dataset=dataset_train,
-                val_dataset=dataset_val,
-                learning_rate=config.LEARNING_RATE / 100,
-                epochs=1000,
-                layers='all')
-    model.keras_model.save_weights(os.path.join(MODEL_DIR, "stage3.h5"), overwrite=True)
+    # print("Training all")
+    # model.train(train_dataset=dataset_train,
+    #             val_dataset=dataset_val,
+    #             learning_rate=config.LEARNING_RATE / 100,
+    #             epochs=1000,
+    #             layers='all')
+    # model.keras_model.save_weights(os.path.join(MODEL_DIR, "stage3.h5"), overwrite=True)
 
 
 if __name__ == "__main__":
