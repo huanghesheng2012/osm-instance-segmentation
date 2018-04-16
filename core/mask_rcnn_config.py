@@ -31,7 +31,7 @@ class MyMaskRcnnConfig(Config):
     LEARNING_RATE = 0.001
 
     # faster training
-    STEPS_PER_EPOCH = 5000 // IMAGES_PER_GPU
+    STEPS_PER_EPOCH = 2500 // IMAGES_PER_GPU
     # STEPS_PER_EPOCH = 280741 // IMAGES_PER_GPU
 
     # all images
@@ -50,7 +50,7 @@ class MyMaskRcnnConfig(Config):
     # TRAIN_ROIS_PER_IMAGE = 64
     # DETECTION_MAX_INSTANCES = 64
 
-    VALIDATION_STEPS = 150  # 60317
+    VALIDATION_STEPS = 100  # 60317
 
     MEAN_PIXEL = np.array([101.2, 89.5, 77.7])
 
