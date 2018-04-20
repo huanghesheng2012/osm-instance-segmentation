@@ -31,7 +31,7 @@ class MyMaskRcnnConfig(Config):
     LEARNING_RATE = 0.001
 
     # faster training
-    STEPS_PER_EPOCH = 5000 // IMAGES_PER_GPU
+    STEPS_PER_EPOCH = 10000 // IMAGES_PER_GPU
     # STEPS_PER_EPOCH = 280741 // IMAGES_PER_GPU
 
     # all images
