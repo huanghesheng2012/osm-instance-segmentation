@@ -14,12 +14,13 @@ class DeepOsmPlugin:
     def __init__(self, iface):
         self.iface = iface
         self.settings = QSettings("Vector Tile Reader", "vectortilereader")
+        self.settings_dialog = SettingsDialog(self.settings)
 
     def initGui(self):
         self.about_action = self._create_action("About", "info.svg", self.show_about)
         self.detect_rectangles_action = self._create_action("Detect building area (rectangularized)", "group.svg", lambda: self.detect(True))
         self.detect_raw_action = self._create_action("Detect building area (raw)", "group.svg", lambda: self.detect(False))
-        self.settings_action = self._create_action("Settings", "settings.svg", lambda: SettingsDialog().show())
+        self.settings_action = self._create_action("Settings", "settings.svg", lambda: self.settings_dialog.show())
 
         self.popupMenu = QMenu(self.iface.mainWindow())
         self.popupMenu.addAction(self.detect_raw_action)

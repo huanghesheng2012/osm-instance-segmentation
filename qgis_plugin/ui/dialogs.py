@@ -44,10 +44,19 @@ class AboutDialog(QDialog, Ui_DlgAbout):
 
 
 class SettingsDialog(QDialog, Ui_DlgSettings):
-    def __init__(self):
+    def __init__(self, settings):
         QDialog.__init__(self)
         self.setupUi(self)
         _update_size(self)
+        self._settings = settings
+
+        self.txtServerPath.textChanged.connect(self.on_host_changed)
+        server_path = settings.value("HOST", None)
+        if server_path:
+            self.txtServerPath.setText(server_path)
 
     def show(self):
         self.exec_()
+
+    def on_host_changed(self):
+        self._settings.setValue("HOST", self.txtServerPath.text())
