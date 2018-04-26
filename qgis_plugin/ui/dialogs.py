@@ -1,8 +1,10 @@
 from ..qgis_2to3 import *
 try:
     from .dlg_about_qt5 import Ui_DlgAbout
+    from .dlg_settings_qt5 import Ui_DlgSettings
 except:
     from .dlg_about_qt4 import Ui_DlgAbout
+    from .dlg_settings_qt4 import Ui_DlgSettings
 
 
 def _update_size(dialog):
@@ -36,6 +38,16 @@ class AboutDialog(QDialog, Ui_DlgAbout):
             with open(about_path, 'r') as f:
                 html = f.read()
                 self.txtAbout.setHtml(html)
+
+    def show(self):
+        self.exec_()
+
+
+class SettingsDialog(QDialog, Ui_DlgSettings):
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+        _update_size(self)
 
     def show(self):
         self.exec_()
