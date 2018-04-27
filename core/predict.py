@@ -27,10 +27,8 @@ class Predictor:
         self.weights_path = weights_path
         self._model = None
 
-    def predict_arrays(self, images: List[Tuple[np.ndarray, str]], extent=None, do_rectangularization=True, tile=None, verbose=1) \
+    def predict_arrays(self, images: List[Tuple[np.ndarray, str]], extent=None, verbose=1) \
             -> List[List[Tuple[int, int]]]:
-        if not tile:
-            tile = (0, 0)
 
         BATCH_SIZE = 30
 

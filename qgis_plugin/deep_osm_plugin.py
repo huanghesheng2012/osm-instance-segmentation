@@ -29,7 +29,7 @@ class DeepOsmPlugin:
         self.popupMenu.addAction(self.about_action)
         self.toolButton = QToolButton()
         self.toolButton.setMenu(self.popupMenu)
-        self.toolButton.setDefaultAction(self.detect_rectangles_action)
+        self.toolButton.setDefaultAction(self.detect_raw_action)
         self.toolButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.toolButtonAction = self.iface.layerToolBar().addWidget(self.toolButton)
 
