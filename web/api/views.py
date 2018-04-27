@@ -1,25 +1,19 @@
 import sys
 import math
 from rest_framework.decorators import api_view
-from rest_framework.parsers import JSONParser, FormParser
+from rest_framework.parsers import JSONParser
 from django.http import JsonResponse
 from .serializers import InferenceRequestSerializer, InferenceRequest
-from core.settings import IMAGE_WIDTH
 from core.utils import get_contour, georeference, rectangularize
 from core.predict import Predictor
-import os
 import base64
 import numpy as np
 from PIL import Image
-from pygeotile.tile import Tile, Point
 import io
-import tempfile
 from shapely import geometry
-import json
 import traceback
 from pycocotools import mask as cocomask
 
-# _predictor = Predictor(os.path.join(os.getcwd(), "model", "mask_rcnn_osm_0076.h5"))
 _predictor = Predictor(r"D:\_mapping-challenge\stage2_0.833.h5")
 
 
@@ -51,9 +45,6 @@ def request_inference(request):
         print("Inf: ", inference)
         try:
             res = _predict(inference)
-            # coll = "GEOMETRYCOLLECTION({})".format(", ".join(res))
-            # with open(r"D:\training_images\_last_predicted\wkt.txt", 'w') as f:
-            #     f.write(coll)
             return JsonResponse({'features': res})
         except Exception as e:
             tb = ""
@@ -98,7 +89,7 @@ def _predict(request: InferenceRequest):
             img_id = "img_id_{}_{}".format(col, row)
             tiles_by_img_id[img_id] = (col, row)
             images_to_predict.append((arr, img_id))
-    point_set = _predictor.predict_arrays(images=images_to_predict, extent=extent)
+    point_set = _predictor.predict_arrays(images=images_to_predict)
     for rle, score, img_id in point_set:
         col, row = tiles_by_img_id[img_id]
         mask = cocomask.decode(rle)

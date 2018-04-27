@@ -27,31 +27,28 @@ class Predictor:
         self.weights_path = weights_path
         self._model = None
 
-    def predict_arrays(self, images: List[Tuple[np.ndarray, str]], extent=None, verbose=1) \
-            -> List[List[Tuple[int, int]]]:
-
-        BATCH_SIZE = 30
+    def predict_arrays(self, images: List[Tuple[np.ndarray, str]], verbose=1) -> List:
+        batch_size = 30
 
         if not self._model:
             print("Loading model")
             inference_config = self.InferenceConfig()
-            inference_config.BATCH_SIZE = BATCH_SIZE
-            inference_config.IMAGES_PER_GPU = BATCH_SIZE
+            inference_config.BATCH_SIZE = batch_size
+            inference_config.IMAGES_PER_GPU = batch_size
             print("Predicting {} images".format(len(images)))
             # Create model in training mode
             model = modellib.MaskRCNN(mode="inference", config=inference_config, model_dir="log")
             model.load_weights(self.weights_path, by_name=True)
             self._model = model
 
-        all_prediction_results = []
         model = self._model
-        batches = math.ceil(len(images) / BATCH_SIZE)
+        batches = int(math.ceil(len(images) / batch_size))
         point_sets = []
         for i in range(batches):
-            start = i * BATCH_SIZE
-            end = start + BATCH_SIZE
+            start = i * batch_size
+            end = start + batch_size
             img_with_id_batch = images[start:end]
-            if len(img_with_id_batch) < BATCH_SIZE:
+            if len(img_with_id_batch) < batch_size:
                 inference_config = self.InferenceConfig()
                 inference_config.BATCH_SIZE = len(img_with_id_batch)
                 inference_config.IMAGES_PER_GPU = len(img_with_id_batch)
@@ -63,48 +60,31 @@ class Predictor:
             results = model.detect(img_batch, image_ids=id_batch, verbose=verbose)
             print("Extracting contours...")
             for i, res in enumerate(results):
-                # all_prediction_results.append((res, id_batch[i]))
                 masks = res['masks']
                 for i in range(masks.shape[-1]):
                     mask = masks[:, :, i]
                     segmentation = cocomask.encode(np.asfortranarray(mask, dtype=np.uint8))
-                    # points = get_contour(mask)
                     score = 1
                     if len(res['scores'] > i):
                         score = res['scores'][i]
                     coco_id = res['coco_id']
                     point_sets.append((segmentation, score, coco_id))
             print("Contours extracted")
-
-        # print("Extracting contours...")
-        # point_sets = []
-        # for res, coco_img_id in all_prediction_results:
-        #     masks = res['masks']
-        #     for i in range(masks.shape[-1]):
-        #         mask = masks[:, :, i]
-        #         points = get_contour(mask)
-        #         score = 1
-        #         if len(res['scores'] > i):
-        #             score = res['scores'][i]
-        #         point_sets.append((list(points), score, coco_img_id))
-        # print("Contours extracted")
         return point_sets
 
-    def predict_path(self, img_path: str, extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
-        return self.predict_paths([img_path], extent=extent, verbose=verbose)
+    def predict_path(self, img_path: str, verbose=1) -> List[List[Tuple[int, int]]]:
+        return self.predict_paths([img_path], verbose=verbose)
 
-    def predict_paths(self, all_paths: List[str], extent=None, verbose=1) -> List[List[Tuple[int, int]]]:
+    def predict_paths(self, all_paths: List[str], verbose=1) -> List[List[Tuple[int, int]]]:
         all_images = []
         for p in all_paths:
-            #img = Image.open(p)
-            #data = np.asarray(img, dtype="uint8")
             data = cv2.imread(p)
             coco_img_id = int(os.path.basename(p).replace(".jpg", ""))
             all_images.append((data, coco_img_id))
-        return self.predict_arrays(images=all_images, extent=extent, verbose=verbose)
+        return self.predict_arrays(images=all_images, verbose=verbose)
 
 
-def test_images(annotations_file_name="predictions.json", processed_images_name="tested_images.txt", nr_images=None, target_dir=TEST_DATA_DIR):
+def test_images(annotations_file_name="predictions.json", nr_images=None, target_dir=TEST_DATA_DIR):
     predictor = Predictor(os.path.join(os.getcwd(), "model", "stage2.h5"))
     annotations_path = os.path.join(os.getcwd(), annotations_file_name)
     images = glob.glob(os.path.join(target_dir, "**/*.jpg"), recursive=True)
